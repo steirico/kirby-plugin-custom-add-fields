@@ -2,10 +2,11 @@
 
 return function($page, $selectedTemplate) {
 
+  $templates = $page->blueprint()->pages()->template();
   $options = [];
   $templateFields = [];
-
-  foreach($page->blueprint()->pages()->template() as $template) {
+  
+  foreach($templates as $template) {
     $options[$template->name()] = $template->title();
     
     if(empty($selectedTemplate)){
@@ -25,7 +26,7 @@ return function($page, $selectedTemplate) {
       'default'  => $selectedTemplate,
       'required' => true,
       'readonly' => count($options) == 1 ? true : false,
-      'icon'     => count($options) == 1 ? $page->blueprint()->pages()->template()->first()->icon() : 'chevron-down',
+      'icon'     => count($options) == 1 ? $templates->first()->icon() : 'chevron-down',
     )
   );
 
@@ -36,11 +37,8 @@ return function($page, $selectedTemplate) {
   $formFields = array_merge($formFields, $templateFields);
 
   $form = new Kirby\Panel\Form($formFields);
-
   $form->cancel($page->isSite() ? '/' : $page);
-
   $form->buttons->submit->val(l('add'));
 
   return $form;
-
 };
