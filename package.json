@@ -1,6 +1,6 @@
 {
     "name": "kirby-plugin-custom-add-fields",
-    "description": "Short description of your plugin",
+    "description": "Custom fields for Kirby's add dialog. This plugin allows to define the fields shown on the page add dialog in a page's blueprint.",
     "author": "Rico Steiner <rico@vweb.ch>",
     "version": "1.0.0",
     "repository": {
