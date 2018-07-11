@@ -23,10 +23,21 @@ panel()->routes(array(
           if(!$form->isValid()) {
             throw new Exception(l('pages.add.error.template'));
           }
+          
           $data = $form->serialize();
-          $page = $parent->children()->create($data['uid'], $data['template'], array(
-            'title' => $data['title']
-          ));
+
+          if(array_key_exists('uid', $data)){
+            $uid = $data['uid'];
+            unset($data['uid']);
+          } else {
+            $uid = uniqid();
+          }
+
+          $template = $data['template'];
+          unset($data['template']);
+
+          $page = $parent->children()->create($uid, $template, $data);
+
           $controller->notify(':)');
           $controller->redirect($page, 'edit');
         } catch(Exception $e) {
