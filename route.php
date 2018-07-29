@@ -33,6 +33,10 @@ panel()->routes(array(
             $uid = uniqid();
           }
 
+          if(!array_key_exists('title', $data)){
+            $data['title'] = $uid;
+          }
+
           $template = $data['template'];
           unset($data['template']);
 
