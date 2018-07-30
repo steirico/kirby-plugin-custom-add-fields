@@ -6,7 +6,6 @@ kirby()->hook('panel.page.create', function($page) {
     $modelName = preg_replace('/\\\\(.+)/m', '$1', $modelName);
 
     if(method_exists($modelName, 'hookPageCreate')){
-        $pageInstance = new $modelName($page->parent(), $page->dirname());
-        $pageInstance->hookPageCreate();
+        $modelName::hookPageCreate($page);
     }    
 });
