@@ -2,7 +2,7 @@
 if(!function_exists('panel')) return;
 panel()->routes(array(
   array(
-    'pattern' => array('pages/(.+)/add', 'pages/(.+)/add/(:any)'),
+    'pattern' => array('(?:(?!.+\/field\/.+))pages/(.+)/add', '(?:(?!.+\/field\/.+))pages/(.+)/add/(:any)'),
     'action'  => function($id, $template='') {
       $panel  = panel();
       $parent = $panel->page($id);
