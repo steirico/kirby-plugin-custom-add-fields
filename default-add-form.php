@@ -3,8 +3,13 @@
 return function($page, $selectedTemplate) {
 
   $templates = $page->blueprint()->pages()->template();
+  $hasForcedTemplate = $page->content()->has('forcedTemplate');
   $options = [];
   $templateFields = [];
+
+  if($hasForcedTemplate){
+    $selectedTemplate = $page->forcedTemplate()->value();
+  }
   
   foreach($templates as $template) {
     $options[$template->name()] = $template->title();
@@ -18,6 +23,8 @@ return function($page, $selectedTemplate) {
     }
   }
 
+  $readOnly = $hasForcedTemplate || (count($options) == 1);
+
   $formFields = array(
     'template' => array(
       'label'    => 'Add a new page based on this template',
@@ -25,8 +32,8 @@ return function($page, $selectedTemplate) {
       'options'  => $options,
       'default'  => $selectedTemplate,
       'required' => true,
-      'readonly' => count($options) == 1 ? true : false,
-      'icon'     => count($options) == 1 ? $templates->first()->icon() : 'chevron-down',
+      'readonly' => $readOnly,
+      'icon'     => $readOnly ? $templates->first()->icon() : 'chevron-down',
     )
   );
 

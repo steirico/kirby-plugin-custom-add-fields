@@ -29,6 +29,8 @@ panel()->routes(array(
           if(array_key_exists('uid', $data)){
             $uid = $data['uid'];
             unset($data['uid']);
+          } else if(array_key_exists('title', $data)){
+            $uid = str::slug($data['title']);
           } else {
             $uid = uniqid();
           }
