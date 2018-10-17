@@ -7,11 +7,6 @@ panel()->routes(array(
       $panel  = panel();
       $parent = $panel->page($id);
       $url = $panel->urls()->current;
-
-      if('' != $template){
-        $url = preg_replace('/(.+)\/(.+)/m', '$1', $url);
-        $panel->urls()->current = $url;
-      }
       
       $controller = new Kirby\Panel\Controllers\Base();
       if($parent->ui()->create() === false) {
