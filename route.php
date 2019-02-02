@@ -12,7 +12,7 @@ panel()->routes(array(
       if($parent->ui()->create() === false) {
         throw new PermissionsException();
       }
-      $form = $panel->form(__DIR__ . DS . 'default-add-Form.php', array($parent, $template), function($form) use($parent, $controller) {
+      $form = $panel->form(__DIR__ . DS . 'default-add-form.php', array($parent, $template), function($form) use($parent, $controller) {
         try {
           $form->validate();
           if(!$form->isValid()) {
