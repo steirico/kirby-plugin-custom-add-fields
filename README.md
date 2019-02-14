@@ -1,26 +1,13 @@
 # Kirby Custom Add Fields Plugin
 Custom fields for Kirby's add dialog. This plugin allows to define the fields shown on Kirby's page add dialog in a page's blueprint.
 
-The base concept for this plugin is taken from this [Kirby forum thread](https://forum.getkirby.com/t/add-field-to-page-creation-modal/9359)
-and the code is based on [@lukaskleinschmidt's demo code](
-https://github.com/lukaskleinschmidt/kirby-custom-add-form).
-
 ## Installation
 Use one of the alternatives below.
 
-### 1. Kirby CLI
-
-If you are using the [Kirby CLI](https://github.com/getkirby/cli) you can install this plugin by running the following commands in your shell:
-
-```
-$ cd path/to/kirby
-$ kirby plugin:install steirico/kirby-plugin-custom-add-fields
-```
-
-### 2. Clone or download
+### 1. Clone or download
 
 1. [Clone](https://github.com/steirico/kirby-plugin-custom-add-fields.git) or [download](https://github.com/steirico/kirby-plugin-custom-add-fields/archive/master.zip)  this repository.
-2. Unzip the archive if needed and rename the folder to `kirby-plugin-custom-add-fields`.
+2. Unzip the archive, rename the folder to `kirby-plugin-custom-add-fields` and move ist to `site/plugins/`.
 
 **Make sure that the plugin folder structure looks like this:**
 
@@ -28,7 +15,7 @@ $ kirby plugin:install steirico/kirby-plugin-custom-add-fields
 site/plugins/kirby-plugin-custom-add-fields/
 ```
 
-### 3. Git Submodule
+### 2. Git Submodule
 
 If you know your way around Git, you can download this plugin as a submodule:
 
@@ -38,7 +25,40 @@ $ git submodule add https://github.com/steirico/kirby-plugin-custom-add-fields s
 ```
 ## Usage
 
-### uid handling
+#### Define Fields
+This plugins add the extra property `addFields` to blueprints.
+To define custom add fields do as you would do for [defining regular fields](https://getkirby.com/docs/reference/panel/sections/fields)
+but put the definition in the property `addFields`.
+
+```yaml
+title: My Blueprint with Custom Add Fields
+
+# Blueprint definitions
+
+addFields:
+    title:
+        label: Title
+        type: text
+        required: true
+        icon: title
+    slug:
+        label: Define a Slug
+        type: text
+        required: true,
+        counter: false
+        icon: url
+    content:
+        label: Content
+        type: textarea
+```
+
+### Hook Scripts
+**TODO**
+- `page.create:after`
+- `PAGE_MODEL_CLASS::hookPageCreate($page)`
+
+### uid/slug handling
+**TODO**
 - available -> taken into account
-- not avialable -> random value taken from uniqid()
+- not avialable -> random value taken (timestamp)
 - set it in hoock script
