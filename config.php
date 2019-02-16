@@ -37,7 +37,6 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
             if(method_exists($modelName, 'hookPageCreate')){
                 $modelName::hookPageCreate($page);
             }
-            return;   
-         }
+        }
     ]
 ]);

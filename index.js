@@ -139,10 +139,11 @@ panel.plugin("steirico/kirby-plugin-custom-add-fields", {
             .post(this.parent + "/children", data)
             .then(page => {
               this.success({
-                route: this.$api.pages.link(page.id),
+                route: this.$api.pages.link(page.parent.id),
                 message: ":)",
                 event: "page.create"
               });
+              this.$router.go();
             })
             .catch(error => {
               this.$refs.dialog.error(error.message);
