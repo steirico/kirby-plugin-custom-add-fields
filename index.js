@@ -80,7 +80,7 @@ const PAGE_CREATE_DIALOG = {
 
       return fields;
     },
-  
+
     open(parent, blueprintApi, section) {
       this.parent  = parent;
       this.section = section;
@@ -111,7 +111,7 @@ const PAGE_CREATE_DIALOG = {
 
     input() {
       if(this.page.template !== this.oldTemplate){
-        var 
+        var
           oTemplate = {},
           template = this.page.template;
 
@@ -158,7 +158,7 @@ panel.plugin("steirico/kirby-plugin-custom-add-fields", {
     function(Vue) {
       const
         VUE_COMPONENTS = Vue.options.components;
-      
+
       Object.keys(VUE_COMPONENTS).forEach(componentName => {
         const COMPONENT = {
           components: {

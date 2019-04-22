@@ -22,5 +22,13 @@
         "files": [
             "config.php"
         ]
+    },
+
+    "require": {
+        "getkirby/composer-installer": "^1.1"
+    },
+
+    "config": {
+        "optimize-autoloader": true
     }
 }

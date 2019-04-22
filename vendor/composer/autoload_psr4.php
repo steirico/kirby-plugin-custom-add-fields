@@ -6,4 +6,5 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'Kirby\\' => array($vendorDir . '/getkirby/composer-installer/src'),
 );
