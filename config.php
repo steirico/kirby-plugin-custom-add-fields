@@ -5,12 +5,16 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
     'api' => [
         'routes' => [
             [
-                'pattern' => 'pages/(:any)/children/blueprints/add-fields',
+                'pattern' => [
+                    'site/children/blueprints/add-fields',
+                    'pages/(:any)/children/blueprints/add-fields',
+                ],
                 'method' => 'GET',
                 'filter' => 'auth',
-                'action'  => function (string $id) {
+                'action'  => function (string $id = '') {
                     $result = [];
-                    $templates = $this->page($id)->blueprints($this->requestQuery('section'));
+                    $object = $id == '' ? $this->site() : $this->page($id);
+                    $templates = $object->blueprints($this->requestQuery('section'));
                     foreach ($templates as $template) {
                         try {
                             $props = Blueprint::load('pages/' . $template['name']);
