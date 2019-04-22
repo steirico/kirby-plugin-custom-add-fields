@@ -28,20 +28,18 @@ This plugin adds the extra property `addFields` to page blueprints.
 To define custom add fields do as you would do for [defining regular fields](https://getkirby.com/docs/reference/panel/sections/fields)
 but put the definition in the property `addFields`.
 
->   `/blueprints/remote.yml`:
+>   `/blueprints/pages/remote.yml`:
 >   ```yaml
 >   title: Blueprint with custom Add Fields
 >
->   sections:
->     content:
->           type: fields
->               # field definitions
->               title:
->                   label: Title
->                   type: text
->               content:
->                   label: Content
->                   type: textarea
+>   fields:
+>       # field definitions
+>       title:
+>           label: Title
+>           type: text
+>       content:
+>           label: Content
+>           type: textarea
 >
 >   # custom add fields definition
 >   addFields:
@@ -83,8 +81,9 @@ The plugin also registers a generic hook which automatically detects and calls t
 [page model's](https://getkirby.com/docs/guide/templates/page-models) static
 method named `hookPageCreate($page)`. Define a page model and the method as follow:
 
-> `/site/models/remotePage.php`:
+> `/site/models/remote.php`:
 > ```php
+> <?php
 > class RemotePage extends Page {
 >     public static function hookPageCreate($page){
 >         // get value of add field remoteUrl
