@@ -1,7 +1,7 @@
 {
     "name": "steirico/kirby-plugin-custom-add-fields",
     "description": "Custom fields for Kirby's add dialog. This plugin allows to define the fields shown on the page add dialog in a page's blueprint.",
-    "version": "2.0.0",
+    "version": "1.0.0-rc",
     "type": "kirby-plugin",
     "license": "MIT",
     "keywords": [
