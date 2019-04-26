@@ -2,6 +2,8 @@
 Custom fields for Kirby's add dialog. This plugin allows to define the fields shown on Kirby's page add dialog in the corresponding
 page's blueprint.
 
+![Demo](assets/demo.gif)
+
 ## Installation
 Use one of the alternatives below.
 
@@ -51,8 +53,10 @@ but put the definition in the property `addFields`.
 >
 >       remoteUrl:
 >           label: URL to external Content
->           type: text
->           required: true
+>           type: select
+>           options:
+>               'https://jaspervdj.be/lorem-markdownum/markdown-html.html?no-wrapping=on': Lorem Markdownum
+>               'https://raw.githubusercontent.com/steirico/kirby-plugin-custom-add-fields/master/README.md': README
 >           icon: url
 >   ```
 
@@ -90,7 +94,7 @@ method named `hookPageCreate($page)`. Define a page model and the method as foll
 >         $remoteUrl = $page->remoteUrl()->value();
 >
 >         // fetch remote content
->         $content = myMagicRemoteContentGetter($remoteUrl);
+>         $content = file_get_contents($remoteUrl);
 >
 >         // update page field content
 >         $page->update(array(
@@ -106,9 +110,10 @@ method named `hookPageCreate($page)`. Define a page model and the method as foll
 ## Know issues
 
 There are some known issues related to this plugin:
-- Use of [query language](https://getkirby.com/docs/guide/blueprints/query-language)
-  in fields such as [select field](https://getkirby.com/docs/reference/panel/fields/select)
-  fails.
+- Fields such as the [pages field](https://getkirby.com/docs/reference/panel/fields/pages) perform
+  additional requests to the backend. Such fields may not work with this plugin.
+  Feel free to file an [issue](https://github.com/steirico/kirby-plugin-custom-add-fields/issues) if you
+  encounter a broken field.
 - [Conditional fields](https://getkirby.com/docs/guide/blueprints/fields#conditional-fields)
   are untested.
 - Kirby offers no possibility to redirect to the newly created page if the `slug`
