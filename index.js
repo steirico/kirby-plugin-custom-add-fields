@@ -137,7 +137,7 @@ const PAGE_CREATE_DIALOG = {
         .post(this.parent + "/children", data)
         .then(page => {
           this.success({
-            route: this.$api.pages.link(this.parent),
+            route: page.parent ? this.$api.pages.link(page.parent.id) : '/',
             message: ":)",
             event: "page.create"
           });
