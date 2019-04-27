@@ -107,6 +107,23 @@ method named `hookPageCreate($page)`. Define a page model and the method as foll
 > }
 >```
 
+### Force a specific Template
+
+The template to be used for the new page can be forced by a field of the current page. By default,
+if a field called `forcedTemplate` exists on the current page its value is taken into account
+as template for the new page.
+
+The field can be changed by [kirby options](https://getkirby.com/docs/guide/configuration#the-config-php):
+> `/site/config/config.php`:
+> ```php
+> <?php
+>
+> return [
+>     // exitsing configurations
+>     'steirico.kirby-plugin-custom-add-fields.forcedTemplate.fieldName' => 'myForcedTemplateField'
+> ];
+>```
+
 ## Know issues
 
 There are some known issues related to this plugin:
