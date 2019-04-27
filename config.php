@@ -3,6 +3,10 @@ use Kirby\Cms\Blueprint;
 use Kirby\Cms\Section;
 
 Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
+    'options' => [
+        'forcedTemplate.fieldName' => 'forcedTemplate'
+    ],
+
     'api' => [
         'routes' => [
             [
@@ -16,7 +20,19 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
                     $result = [];
                     $object = $id == '' ? $this->site() : $this->page($id);
                     $templates = $object->blueprints($this->requestQuery('section'));
+
+                    $forcedTemplateFieldName = option('steirico.kirby-plugin-custom-add-fields.forcedTemplate.fieldName');
+                    $forcedTemplateFieldName = $forcedTemplateFieldName ? $forcedTemplateFieldName : '';
+                    $hasForcedTemplate = $object->content()->has($forcedTemplateFieldName);
+
+                    if($hasForcedTemplate){
+                        $forcedTemplate = $object->{$forcedTemplateFieldName}()->value();
+                    }
+
                     foreach ($templates as $template) {
+                        if($hasForcedTemplate && $template['name'] != $forcedTemplate){
+                            continue;
+                        }
                         try {
                             $props = Blueprint::load('pages/' . $template['name']);
                             $addFields = A::get($props, 'addFields', null);
