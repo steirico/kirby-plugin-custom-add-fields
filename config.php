@@ -61,7 +61,41 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
                     }
                     return $result;
                 }
-            ]
+            ],
+            [
+                'pattern' => 'pages/(:any)/addsections/(:any)',
+                'method'  => 'GET',
+                'action'  => function (string $id, string $sectionName) {
+                    if ($section = $this->page($id)->blueprint()->section($sectionName)) {
+                        return $section->toResponse();
+                    }
+                }
+            ],
+            [
+                'pattern' => 'pages/(:any)/addfields/(:any)/(:any)/(:all?)',
+                'method'  => 'ALL',
+                'action'  => function (string $id, string $template, string $fieldName, string $path = null) {
+                    $object = $id == '' ? $this->site() : $this->page($id);
+                    $dummyPage = Page::factory(array(
+                        'url'    => null,
+                        'num'    => null,
+                        'parent' => $object,
+                        'site'   => $object->site(),
+                        'slug' => 'dummy',
+                        'template' => $template,
+                        'model' => $object,
+                        'draft' => true,
+                        'content' => []
+                    ));
+
+                    if ($dummyPage) {
+                        $field = $this->fieldApi($dummyPage, $fieldName, $path);
+                        return $field;
+                    } else {
+                        return null;
+                    }
+                }
+            ],
         ]
     ],
 

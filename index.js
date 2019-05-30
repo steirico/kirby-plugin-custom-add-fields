@@ -72,8 +72,8 @@ const PAGE_CREATE_DIALOG = {
 
         field.section = section;
         field.endpoints = {
-          field: endpoint + "/fields/" + name,
-          section: endpoint + "/sections/" + section,
+          field: endpoint + "/addfields/" + this.template + "/" + name,
+          section: endpoint + "/addsections/" + this.template + "/" + section,
           model: endpoint
         };
       });
@@ -98,7 +98,7 @@ const PAGE_CREATE_DIALOG = {
 
           if (this.templates[0]) {
             this.page.template = this.templates[0].value;
-            this.oldTemplate = this.templates[0].value;
+            this.template = this.templates[0].value;
             this.addFields = this.templates[0].addFields;
           }
 
@@ -110,12 +110,12 @@ const PAGE_CREATE_DIALOG = {
     },
 
     input() {
-      if(this.page.template !== this.oldTemplate){
+      if(this.page.template !== this.template){
         var
           oTemplate = {},
           template = this.page.template;
 
-        this.oldTemplate  = template;
+        this.template  = template;
 
         oTemplate = this.templates.find(function(tpl){
           return tpl.value === template;
