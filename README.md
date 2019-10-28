@@ -33,7 +33,7 @@ This plugin adds the extra property `addFields` to page blueprints.
 To define custom add fields do as you would do for [defining regular fields](https://getkirby.com/docs/reference/panel/sections/fields)
 but put the definition in the property `addFields`.
 
->   `/blueprints/pages/remote.yml`:
+> `/blueprints/pages/remote.yml`:
 >
 >   ```yaml
 >   title: Blueprint with custom Add Fields
@@ -130,6 +130,26 @@ The field can be changed by [kirby options](https://getkirby.com/docs/guide/conf
 >     'steirico.kirby-plugin-custom-add-fields.forcedTemplate.fieldName' => 'myForcedTemplateField'
 > ];
 >```
+
+### Skip Add Dialog
+
+The plugin allows to skip the add dialog ([see forum](https://forum.getkirby.com/t/skip-add-dialog-possible/14854)).
+
+> `/blueprints/pages/parent.yml`:
+>
+>   ```yaml
+>   title: Parent Blueprint which skips the Add Dialog
+>
+>   # custom add fields definition
+>   addFields:
+>       __dialog:
+>           skip: true
+>           forcedTemplate: remote
+>   ```
+
+Beside setting the property `skip: true` one has to define the template for the new page.
+This can be achieved either by setting the property `forcedTemplate` or by the means
+described in [Force a specific Template](#Force-a-specific-Template).
 
 ## Know issues
 

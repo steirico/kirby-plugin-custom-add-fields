@@ -21,12 +21,40 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
                     $object = $id == '' ? $this->site() : $this->page($id);
                     $templates = $object->blueprints($this->requestQuery('section'));
 
+                    $parentProps = Blueprint::load('pages/' . $object->template()->name());
+                    $parentAddFields = A::get($parentProps, 'addFields', null);
+
+                    $dialogProperties = A::get($parentAddFields, '__dialog', null);
+                    $skipDialog  = A::get($dialogProperties, 'skip', false);
+
                     $forcedTemplateFieldName = option('steirico.kirby-plugin-custom-add-fields.forcedTemplate.fieldName');
                     $forcedTemplateFieldName = $forcedTemplateFieldName ? $forcedTemplateFieldName : '';
                     $hasForcedTemplate = $object->content()->has($forcedTemplateFieldName);
+                    $forcedTemplate = '';
 
                     if($hasForcedTemplate){
                         $forcedTemplate = $object->{$forcedTemplateFieldName}()->value();
+                    }
+
+                    $forcedTemplate = $forcedTemplate != '' ? $forcedTemplate : A::get($dialogProperties, 'forcedTemplate', '');
+
+                    if ($skipDialog) {
+                        if ($forcedTemplate == ''){
+                            throw new Exception("Set 'forcedTemplate' in order to skip add dialog.");
+                        } else {
+                            $now = time();
+                            $result = array(
+                                'skipDialog' => true,
+                                'page' => array(
+                                    'template'  => $forcedTemplate,
+                                    'slug' => $now,
+                                    'content' => array (
+                                        'title' => $now,
+                                    )
+                                )
+                            );
+                            return $result;
+                        }
                     }
 
                     foreach ($templates as $template) {
@@ -37,6 +65,7 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
                             $props = Blueprint::load('pages/' . $template['name']);
                             $addFields = A::get($props, 'addFields', null);
                             if($addFields){
+                                unset($addFields['__dialog']);
                                 $fieldOrder = array_change_key_case($addFields, CASE_LOWER);
 
                                 $title = A::get($addFields, 'title', null);
