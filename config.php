@@ -37,6 +37,8 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
                             $props = Blueprint::load('pages/' . $template['name']);
                             $addFields = A::get($props, 'addFields', null);
                             if($addFields){
+                                $fieldOrder = array_change_key_case($addFields, CASE_LOWER);
+
                                 $title = A::get($addFields, 'title', null);
                                 $attr = [
                                     'model' => $object,
@@ -48,6 +50,8 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
                                 if($title){
                                     $addFields['title'] = $title;
                                 }
+
+                                $addFields = array_replace($fieldOrder, $addFields);
 
                             }
                             array_push($result, [

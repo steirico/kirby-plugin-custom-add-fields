@@ -1,10 +1,12 @@
 # Kirby custom Add Fields Plugin
+
 Custom fields for Kirby's add dialog. This plugin allows to define the fields shown on Kirby's page add dialog in the corresponding
 page's blueprint.
 
 ![Demo](assets/demo.gif)
 
 ## Installation
+
 Use one of the alternatives below.
 
 ### Download
@@ -13,24 +15,26 @@ Download and copy this repository to `/site/plugins/kirby-plugin-custom-add-fiel
 
 ### Git submodule
 
-```
+```bash
 git submodule add https://github.com/steirico/kirby-plugin-custom-add-fields.git site/plugins/kirby-plugin-custom-add-fields
 ```
 
 ### Composer
 
-```
+```bash
 composer require steirico/kirby-plugin-custom-add-fields
 ```
 
 ## Usage
 
 ### Defining custom Add Fields
+
 This plugin adds the extra property `addFields` to page blueprints.
 To define custom add fields do as you would do for [defining regular fields](https://getkirby.com/docs/reference/panel/sections/fields)
 but put the definition in the property `addFields`.
 
 >   `/blueprints/pages/remote.yml`:
+>
 >   ```yaml
 >   title: Blueprint with custom Add Fields
 >
@@ -69,6 +73,7 @@ taken into account for the new page straightforwardly. In the example above the 
 
 In order to have kirby adding pages correctly the property `slug` has to be set.
 There are three ways to define a page's `slug`:
+
 1. Add a custom add field named `slug` in order to define the `slug` manually.
 1. If a field named `slug` is missing the plugin will set the `slug` based on
    the current timestamp.
@@ -86,6 +91,7 @@ The plugin also registers a generic hook which automatically detects and calls t
 method named `hookPageCreate($page)`. Define a page model and the method as follow:
 
 > `/site/models/remote.php`:
+>
 > ```php
 > <?php
 > class RemotePage extends Page {
@@ -115,6 +121,7 @@ as template for the new page.
 
 The field can be changed by [kirby options](https://getkirby.com/docs/guide/configuration#the-config-php):
 > `/site/config/config.php`:
+>
 > ```php
 > <?php
 >
@@ -127,16 +134,14 @@ The field can be changed by [kirby options](https://getkirby.com/docs/guide/conf
 ## Know issues
 
 There are some known issues related to this plugin:
+
 - Some fields Fields such as the [pages field](https://getkirby.com/docs/reference/panel/fields/pages) perform
   additional requests to the backend. Although the pages field works as of v1.1.1, such fields may not work with this plugin.
   Feel free to file an [issue](https://github.com/steirico/kirby-plugin-custom-add-fields/issues) if you
   encounter a broken field.
-- [Conditional fields](https://getkirby.com/docs/guide/blueprints/fields#conditional-fields)
-  are untested.
 - Kirby offers no possibility to redirect to the newly created page if the `slug`
   has been [modified in a hook](https://forum.getkirby.com/t/how-to-redirect-after-slug-changed-in-page-update-after-hook/13173/3).
   Therefore, after adding a page the panel remains on the actual page.
-
 
 ## License
 
