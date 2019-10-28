@@ -88,6 +88,10 @@ const PAGE_CREATE_DIALOG = {
       this.$api
         .get(blueprintApi + '/add-fields', {section: section})
         .then(response => {
+          if(response.skipDialog){
+            this.submit(response.page);
+            return;
+          }
           this.templates = response.map(blueprint => {
             return {
               value: blueprint.name,
@@ -124,12 +128,18 @@ const PAGE_CREATE_DIALOG = {
       }
     },
 
-    submit() {
-      let data = {
-        template: this.page.template,
-        slug: this.page.slug || Date.now(),
-        content: this.page
-      };
+    submit(forced) {
+      let data = {};
+      
+      if(forced){
+        data = forced;
+      } else {
+        data = {
+          template: this.page.template,
+          slug: this.page.slug || Date.now(),
+          content: this.page
+        };
+      }
 
       data.content.addFields = undefined;
 
