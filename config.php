@@ -21,7 +21,7 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
                     $object = $id == '' ? $this->site() : $this->page($id);
                     $templates = $object->blueprints($this->requestQuery('section'));
 
-                    $parentProps = Blueprint::load('pages/' . $object->template()->name());
+                    $parentProps = Blueprint::load($object->blueprint()->name());
                     $parentAddFields = A::get($parentProps, 'addFields', null);
 
                     $dialogProperties = A::get($parentAddFields, '__dialog', null);

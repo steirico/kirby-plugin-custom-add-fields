@@ -141,7 +141,9 @@ const PAGE_CREATE_DIALOG = {
         };
       }
 
-      data.content.addFields = undefined;
+      if (data.content && data.content.addFields) {
+        data.content.addFields = undefined;
+      }
 
       this.$api
         .post(this.parent + "/children", data)
