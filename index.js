@@ -89,7 +89,7 @@ const PAGE_CREATE_DIALOG = {
         .get(blueprintApi + '/add-fields', {section: section})
         .then(response => {
           if(response.skipDialog){
-            this.submit(response.page);
+            this.submit(response);
             return;
           }
           this.templates = response.map(blueprint => {
@@ -128,11 +128,11 @@ const PAGE_CREATE_DIALOG = {
       }
     },
 
-    submit(forced) {
+    submit(pageData) {
       let data = {};
       
-      if(forced){
-        data = forced;
+      if(pageData.skipDialog){
+        data = pageData.page;
       } else {
         data = {
           template: this.page.template,
