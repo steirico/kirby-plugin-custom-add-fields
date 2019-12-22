@@ -13,7 +13,7 @@ const PAGE_CREATE_DIALOG = {
         ref="form"
         :fields="fields"
         :key="addFields"
-        :novalidate="true"
+        :novalidate="false"
         v-model="page"
         @submit="submit"
         @input="input"
@@ -128,36 +128,52 @@ const PAGE_CREATE_DIALOG = {
       }
     },
 
+    isValid() {
+      var errors = this.$refs.form.$refs.fields.errors;
+      var invalid = true;
+
+      Object.keys(errors).some(field => {
+        var error = errors[field];
+        invalid = error.$pending || error.$invalid || error.$error;
+        return invalid;
+      });
+      return !invalid;
+    },
+
     submit(pageData) {
-      let data = {};
-      
-      if(pageData.skipDialog){
-        data = pageData.page;
-      } else {
-        data = {
-          template: this.page.template,
-          slug: this.page.slug || Date.now(),
-          content: this.page
-        };
-      }
+      if (this.isValid()){
+        var data = {};
+        
+        if(pageData.skipDialog){
+          data = pageData.page;
+        } else {
+          data = {
+            template: this.page.template,
+            slug: this.page.slug || Date.now(),
+            content: this.page
+          };
+        }
 
-      if (data.content && data.content.addFields) {
-        data.content.addFields = undefined;
-      }
+        if (data.content && data.content.addFields) {
+          data.content.addFields = undefined;
+        }
 
-      this.$api
-        .post(this.parent + "/children", data)
-        .then(page => {
-          this.success({
-            route: page.parent ? this.$api.pages.link(page.parent.id) : '/',
-            message: ":)",
-            event: "page.create"
+        this.$api
+          .post(this.parent + "/children", data)
+          .then(page => {
+            this.success({
+              route: page.parent ? this.$api.pages.link(page.parent.id) : '/',
+              message: ":)",
+              event: "page.create"
+            });
+            this.$router.go();
+          })
+          .catch(error => {
+            this.$refs.dialog.error(error.message);
           });
-          this.$router.go();
-        })
-        .catch(error => {
-          this.$refs.dialog.error(error.message);
-        });
+      } else {
+        this.$refs.dialog.error("Form is not valid");
+      }
     }
   }
 };
