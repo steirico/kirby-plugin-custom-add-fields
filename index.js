@@ -12,24 +12,28 @@ const PAGE_CREATE_DIALOG = {
       <k-form
         ref="form"
         :fields="fields"
-        :key="addFields"
         :novalidate="false"
+        :key="template"
         v-model="page"
         @submit="submit"
         @input="input"
       />
     </k-dialog>
   `,
-  props: {
-    addFields: Object
+  data() {
+    return {
+      notification: null,
+      parent: null,
+      section: null,
+      templates: [],
+      template: '',
+      page: {},
+      addFields: {}
+    };
   },
+
   computed: {
     fields() {
-      return this.getFields();
-    }
-  },
-  methods: {
-    getFields() {
       var
         fields = {},
         field = {},
@@ -70,6 +74,14 @@ const PAGE_CREATE_DIALOG = {
       Object.keys(fields).forEach(name => {
         field = fields[name];
 
+        if (name != "title" && name != "template" && this.page[name] === undefined){
+          if (field.default !== null && field.default !== undefined) {
+            this.$set(this.page, name, this.$helper.clone(field.default));
+          } else {
+            this.$set(this.page, name, null);
+          }
+        }
+
         field.section = section;
         field.endpoints = {
           field: endpoint + "/addfields/" + this.template + "/" + name,
@@ -79,8 +91,10 @@ const PAGE_CREATE_DIALOG = {
       });
 
       return fields;
-    },
+    }
+  },
 
+  methods: {
     open(parent, blueprintApi, section) {
       this.parent  = parent;
       this.section = section;
@@ -125,6 +139,7 @@ const PAGE_CREATE_DIALOG = {
           return tpl.value === template;
         });
         this.addFields = oTemplate.addFields;
+        this.$set(this.page, "template", template);
       }
     },
 
