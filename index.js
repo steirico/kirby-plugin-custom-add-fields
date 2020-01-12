@@ -62,7 +62,7 @@ const PAGE_CREATE_DIALOG = {
 
       fields.template = {
         name: "template",
-        label: "Add a new page based on this template",
+        label: this.$t("kirby-plugin-custom-add-fields.addBasedOnTemplate"),
         type: "select",
         disabled: this.templates.length === 1,
         required: true,
