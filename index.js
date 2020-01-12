@@ -12,24 +12,28 @@ const PAGE_CREATE_DIALOG = {
       <k-form
         ref="form"
         :fields="fields"
-        :key="addFields"
-        :novalidate="true"
+        :novalidate="false"
+        :key="template"
         v-model="page"
         @submit="submit"
         @input="input"
       />
     </k-dialog>
   `,
-  props: {
-    addFields: Object
+  data() {
+    return {
+      notification: null,
+      parent: null,
+      section: null,
+      templates: [],
+      template: '',
+      page: {},
+      addFields: {}
+    };
   },
+
   computed: {
     fields() {
-      return this.getFields();
-    }
-  },
-  methods: {
-    getFields() {
       var
         fields = {},
         field = {},
@@ -58,7 +62,7 @@ const PAGE_CREATE_DIALOG = {
 
       fields.template = {
         name: "template",
-        label: "Add a new page based on this template",
+        label: this.$t("kirby-plugin-custom-add-fields.addBasedOnTemplate"),
         type: "select",
         disabled: this.templates.length === 1,
         required: true,
@@ -70,6 +74,14 @@ const PAGE_CREATE_DIALOG = {
       Object.keys(fields).forEach(name => {
         field = fields[name];
 
+        if (name != "title" && name != "template" && this.page[name] === undefined){
+          if (field.default !== null && field.default !== undefined) {
+            this.$set(this.page, name, this.$helper.clone(field.default));
+          } else {
+            this.$set(this.page, name, null);
+          }
+        }
+
         field.section = section;
         field.endpoints = {
           field: endpoint + "/addfields/" + this.template + "/" + name,
@@ -79,8 +91,10 @@ const PAGE_CREATE_DIALOG = {
       });
 
       return fields;
-    },
+    }
+  },
 
+  methods: {
     open(parent, blueprintApi, section) {
       this.parent  = parent;
       this.section = section;
@@ -125,39 +139,56 @@ const PAGE_CREATE_DIALOG = {
           return tpl.value === template;
         });
         this.addFields = oTemplate.addFields;
+        this.$set(this.page, "template", template);
       }
     },
 
+    isValid() {
+      var errors = this.$refs.form.$refs.fields.errors;
+      var invalid = true;
+
+      Object.keys(errors).some(field => {
+        var error = errors[field];
+        invalid = error.$pending || error.$invalid || error.$error;
+        return invalid;
+      });
+      return !invalid;
+    },
+
     submit(pageData) {
-      let data = {};
-      
-      if(pageData.skipDialog){
-        data = pageData.page;
-      } else {
-        data = {
-          template: this.page.template,
-          slug: this.page.slug || Date.now(),
-          content: this.page
-        };
-      }
+      if (this.isValid()){
+        var data = {};
+        
+        if(pageData.skipDialog){
+          data = pageData.page;
+        } else {
+          data = {
+            template: this.page.template,
+            slug: this.page.slug || Date.now(),
+            content: this.page
+          };
+        }
 
-      if (data.content && data.content.addFields) {
-        data.content.addFields = undefined;
-      }
+        if (data.content && data.content.addFields) {
+          data.content.addFields = undefined;
+        }
 
-      this.$api
-        .post(this.parent + "/children", data)
-        .then(page => {
-          this.success({
-            route: page.parent ? this.$api.pages.link(page.parent.id) : '/',
-            message: ":)",
-            event: "page.create"
+        this.$api
+          .post(this.parent + "/children", data)
+          .then(page => {
+            this.success({
+              route: page.parent ? this.$api.pages.link(page.parent.id) : '/',
+              message: ":)",
+              event: "page.create"
+            });
+            this.$router.go();
+          })
+          .catch(error => {
+            this.$refs.dialog.error(error.message);
           });
-          this.$router.go();
-        })
-        .catch(error => {
-          this.$refs.dialog.error(error.message);
-        });
+      } else {
+        this.$refs.dialog.error("Form is not valid");
+      }
     }
   }
 };

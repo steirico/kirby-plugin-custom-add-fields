@@ -6,6 +6,20 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
     'options' => [
         'forcedTemplate.fieldName' => 'forcedTemplate'
     ],
+    'translations' => [
+        'en' => [
+            'kirby-plugin-custom-add-fields.addBasedOnTemplate' => 'Add a new page based on this template',
+        ],
+        'de' => [
+            'kirby-plugin-custom-add-fields.addBasedOnTemplate' => 'Neue Seite basierend auf diesem Template hinzufügen',
+        ],
+        'fr' => [
+            'kirby-plugin-custom-add-fields.addBasedOnTemplate' => 'Ajouter une nouvelle page basée sur ce modèle',
+        ],
+        'it' => [
+            'kirby-plugin-custom-add-fields.addBasedOnTemplate' => 'Aggiungere una nuova pagina basata su questo modello',
+        ]
+    ],
 
     'api' => [
         'routes' => [
@@ -69,6 +83,9 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
                                 $fieldOrder = array_change_key_case($addFields, CASE_LOWER);
 
                                 $title = A::get($addFields, 'title', null);
+                                if($title) {
+                                    $addFields["kirby-plugin-custom-add-fields-title"] = $title;
+                                }
                                 $attr = [
                                     'model' => $object,
                                     'fields' => $addFields
@@ -77,7 +94,8 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
                                 $addFields = $addSection->fields();
 
                                 if($title){
-                                    $addFields['title'] = $title;
+                                    $addFields['title'] = $addFields["kirby-plugin-custom-add-fields-title"];
+                                    unset($addFields["kirby-plugin-custom-add-fields-title"]);
                                 }
 
                                 $addFields = array_replace($fieldOrder, $addFields);
