@@ -83,6 +83,9 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
                                 $fieldOrder = array_change_key_case($addFields, CASE_LOWER);
 
                                 $title = A::get($addFields, 'title', null);
+                                if($title) {
+                                    $addFields["kirby-plugin-custom-add-fields-title"] = $title;
+                                }
                                 $attr = [
                                     'model' => $object,
                                     'fields' => $addFields
@@ -91,7 +94,8 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
                                 $addFields = $addSection->fields();
 
                                 if($title){
-                                    $addFields['title'] = $title;
+                                    $addFields['title'] = $addFields["kirby-plugin-custom-add-fields-title"];
+                                    unset($addFields["kirby-plugin-custom-add-fields-title"]);
                                 }
 
                                 $addFields = array_replace($fieldOrder, $addFields);
