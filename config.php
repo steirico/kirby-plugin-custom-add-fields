@@ -79,32 +79,41 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
                             $props = Blueprint::load('pages/' . $template['name']);
                             $addFields = A::get($props, 'addFields', null);
                             if($addFields){
+                                $redirectToNewPage = A::get($addFields['__dialog'], 'redirect', false);
                                 unset($addFields['__dialog']);
-                                $fieldOrder = array_change_key_case($addFields, CASE_LOWER);
 
-                                $title = A::get($addFields, 'title', null);
-                                if($title) {
-                                    $addFields["kirby-plugin-custom-add-fields-title"] = $title;
+                                if(!empty($addFields)) {
+                                    $fieldOrder = array_change_key_case($addFields, CASE_LOWER);
+
+                                    $title = A::get($addFields, 'title', null);
+                                    if($title) {
+                                        $addFields["kirby-plugin-custom-add-fields-title"] = $title;
+                                    }
+                                    $attr = [
+                                        'model' => $object,
+                                        'fields' => $addFields
+                                    ];
+                                    $addSection = new Section('fields', $attr);
+                                    $addFields = $addSection->fields();
+
+                                    if($title){
+                                        $addFields['title'] = $addFields["kirby-plugin-custom-add-fields-title"];
+                                        unset($addFields["kirby-plugin-custom-add-fields-title"]);
+                                    }
+
+                                    $addFields = array_replace($fieldOrder, $addFields);
                                 }
-                                $attr = [
-                                    'model' => $object,
-                                    'fields' => $addFields
-                                ];
-                                $addSection = new Section('fields', $attr);
-                                $addFields = $addSection->fields();
 
-                                if($title){
-                                    $addFields['title'] = $addFields["kirby-plugin-custom-add-fields-title"];
-                                    unset($addFields["kirby-plugin-custom-add-fields-title"]);
-                                }
-
-                                $addFields = array_replace($fieldOrder, $addFields);
-
+                            } else {
+                                $redirectToNewPage = true;
                             }
                             array_push($result, [
                                 'name'  => $template['name'],
                                 'title' => $template['title'],
                                 'addFields' => $addFields,
+                                'options'=> [
+                                    'redirectToNewPage'=> $redirectToNewPage
+                                ],
                                 'parentPage' => $id
                             ]);
                         } catch (Throwable $e) {
