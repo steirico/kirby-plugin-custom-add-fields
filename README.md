@@ -113,6 +113,21 @@ method named `hookPageCreate($page)`. Define a page model and the method as foll
 > }
 >```
 
+If exceptions are thrown in `page.create:after` hooks or in `hookPageCreate($page)`,
+a corresponding error is sent back to the panel, but the newly created page remains.
+In such cases it is advisable to catch exceptions and delete the newly created page:
+
+> ```php
+> try {
+>     // set slug according to add field title
+>     $page->changeSlug(Str::slug($page->title()->value()));
+> } catch (Kirby\Exception\DuplicateException $e) {
+>     // A pages withe the same slug already exists.
+>     // Therefore, delete the newly created one.
+>     $page->delete(true);
+> }
+>```
+
 ### Force a specific Template
 
 The template to be used for the new page can be forced by a field of the current page. By default,
