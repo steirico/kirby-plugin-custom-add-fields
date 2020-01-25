@@ -79,8 +79,14 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
                             $props = Blueprint::load('pages/' . $template['name']);
                             $addFields = A::get($props, 'addFields', null);
                             if($addFields){
-                                $redirectToNewPage = A::get($addFields['__dialog'], 'redirect', false);
-                                unset($addFields['__dialog']);
+                                $dialogProperties = A::get($addFields, '__dialog', null);
+                                if($dialogProperties) {
+                                    $redirectToNewPage = A::get($addFields['__dialog'], 'redirect', false);
+                                    unset($addFields['__dialog']);
+                                } else {
+                                    $redirectToNewPage = false;
+                                }
+                                
 
                                 if(!empty($addFields)) {
                                     $fieldOrder = array_change_key_case($addFields, CASE_LOWER);
