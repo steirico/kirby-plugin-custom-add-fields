@@ -82,6 +82,14 @@ const PAGE_CREATE_DIALOG = {
           }
         }
 
+        if (name === "title" && this.page[name] === "") {
+          if (field.default !== null && field.default !== undefined) {
+            this.$set(this.page, name, this.$helper.clone(field.default));
+          } else {
+            this.$set(this.page, name, "");
+          }
+        }
+
         field.section = section;
         field.endpoints = {
           field: endpoint + "/addfields/" + this.template + "/" + name,

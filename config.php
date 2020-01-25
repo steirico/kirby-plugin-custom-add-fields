@@ -105,6 +105,7 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
                                     if($title){
                                         $addFields['title'] = $addFields["kirby-plugin-custom-add-fields-title"];
                                         unset($addFields["kirby-plugin-custom-add-fields-title"]);
+                                        $addFields['title']['name'] = 'title';
                                     }
 
                                     $addFields = array_replace($fieldOrder, $addFields);
