@@ -82,6 +82,14 @@ const PAGE_CREATE_DIALOG = {
           }
         }
 
+        if (name === "title" && this.page[name] === "") {
+          if (field.default !== null && field.default !== undefined) {
+            this.$set(this.page, name, this.$helper.clone(field.default));
+          } else {
+            this.$set(this.page, name, "");
+          }
+        }
+
         field.section = section;
         field.endpoints = {
           field: endpoint + "/addfields/" + this.template + "/" + name,
@@ -110,7 +118,8 @@ const PAGE_CREATE_DIALOG = {
             return {
               value: blueprint.name,
               text: blueprint.title,
-              addFields: blueprint.addFields
+              addFields: blueprint.addFields,
+              options: blueprint.options
             };
           });
 
@@ -118,6 +127,7 @@ const PAGE_CREATE_DIALOG = {
             this.page.template = this.templates[0].value;
             this.template = this.templates[0].value;
             this.addFields = this.templates[0].addFields;
+            this.options = this.templates[0].options;
           }
 
           this.$refs.dialog.open();
@@ -139,6 +149,7 @@ const PAGE_CREATE_DIALOG = {
           return tpl.value === template;
         });
         this.addFields = oTemplate.addFields;
+        this.options = oTemplate.options;
         this.$set(this.page, "template", template);
       }
     },
@@ -158,6 +169,7 @@ const PAGE_CREATE_DIALOG = {
     submit(pageData) {
       if (this.isValid()){
         var data = {};
+        var route = '';
         
         if(pageData.skipDialog){
           data = pageData.page;
@@ -176,8 +188,14 @@ const PAGE_CREATE_DIALOG = {
         this.$api
           .post(this.parent + "/children", data)
           .then(page => {
+            if(this.options.redirectToNewPage) {
+              route = this.$api.pages.link(page.id);
+            } else {
+              route = page.parent ? this.$api.pages.link(page.parent.id) : '/';
+            }
+
             this.success({
-              route: page.parent ? this.$api.pages.link(page.parent.id) : '/',
+              route: route,
               message: ":)",
               event: "page.create"
             });

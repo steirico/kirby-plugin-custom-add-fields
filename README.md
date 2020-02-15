@@ -113,6 +113,40 @@ method named `hookPageCreate($page)`. Define a page model and the method as foll
 > }
 >```
 
+If exceptions are thrown in `page.create:after` hooks or in `hookPageCreate($page)`,
+a corresponding error is sent back to the panel, but the newly created page remains.
+In such cases it is advisable to catch exceptions and delete the newly created page:
+
+> ```php
+> try {
+>     // set slug according to add field title
+>     $page->changeSlug(Str::slug($page->title()->value()));
+> } catch (Kirby\Exception\DuplicateException $e) {
+>     // A pages withe the same slug already exists.
+>     // Therefore, delete the newly created one.
+>     $page->delete(true);
+> }
+>```
+
+### Configure Redirects
+
+Kirby's add dialog redirects to the newly created page. Since there is [a related kirby issue](https://github.com/getkirby/kirby/issues/2377)
+if slugs are changed in hooks, this behavior can not be reproduced reliably.
+Therefore, the plugin's default behavior is to remain on the actual panel page after a page has been added.
+
+If desired, redirect to the newly created page is possible on a per blueprint basis by setting the property `redirect` to `true`:
+
+> `/blueprints/pages/parent.yml`:
+>
+>   ```yaml
+>   title: Parent Blueprint which skips the Add Dialog
+>
+>   # custom add fields definition
+>   addFields:
+>       __dialog:
+>           redirect: true
+>   ```
+
 ### Force a specific Template
 
 The template to be used for the new page can be forced by a field of the current page. By default,
@@ -159,9 +193,6 @@ There are some known issues related to this plugin:
   additional requests to the backend. Although the pages field works as of v1.1.1, such fields may not work with this plugin.
   Feel free to file an [issue](https://github.com/steirico/kirby-plugin-custom-add-fields/issues) if you
   encounter a broken field.
-- Kirby offers no possibility to redirect to the newly created page if the `slug`
-  has been [modified in a hook](https://forum.getkirby.com/t/how-to-redirect-after-slug-changed-in-page-update-after-hook/13173/3).
-  Therefore, after adding a page the panel remains on the actual page.
 
 ## License
 
