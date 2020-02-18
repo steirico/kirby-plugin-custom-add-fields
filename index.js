@@ -181,10 +181,9 @@ const PAGE_CREATE_DIALOG = {
           };
         }
 
-        if (data.content && data.content.addFields) {
-          data.content.addFields = undefined;
-        }
-
+        delete data.content.addFields;
+        delete data.content.template;
+   
         this.$api
           .post(this.parent + "/children", data)
           .then(page => {
