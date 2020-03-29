@@ -155,15 +155,24 @@ const PAGE_CREATE_DIALOG = {
     },
 
     isValid() {
-      var errors = this.$refs.form.$refs.fields.errors;
-      var invalid = true;
+      var
+        form = this.$refs.form,
+        errors = {},
+        invalid = false;
 
-      Object.keys(errors).some(field => {
-        var error = errors[field];
-        invalid = error.$pending || error.$invalid || error.$error;
-        return invalid;
-      });
-      return !invalid;
+      if(form) {
+        errors = form.$refs.fields.errors;
+        invalid = true;
+
+        Object.keys(errors).some(field => {
+          var error = errors[field];
+          invalid = error.$pending || error.$invalid || error.$error;
+          return invalid;
+        });
+        return !invalid;
+      } else {
+        return !invalid;
+      }
     },
 
     submit(pageData) {
