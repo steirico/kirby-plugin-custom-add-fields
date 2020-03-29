@@ -196,7 +196,7 @@ const PAGE_CREATE_DIALOG = {
         this.$api
           .post(this.parent + "/children", data)
           .then(page => {
-            if(this.options.redirectToNewPage) {
+            if(this.options && this.options.redirectToNewPage) {
               route = this.$api.pages.link(page.id);
             } else {
               route = page.parent ? this.$api.pages.link(page.parent.id) : '/';
