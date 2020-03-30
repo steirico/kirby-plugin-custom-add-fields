@@ -20,6 +20,9 @@
     ],
 
     "autoload": {
+        "classmap": [
+            "src/"
+        ],
         "files": [
             "config.php"
         ]

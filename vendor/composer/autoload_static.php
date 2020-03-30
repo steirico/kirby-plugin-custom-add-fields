@@ -25,10 +25,13 @@ class ComposerStaticInit98b27033413c2529b3e6c831cfefa4f9
     );
 
     public static $classMap = array (
+        'AddDialog' => __DIR__ . '/../..' . '/src/AddDialog.php',
+        'CustomAddDialog' => __DIR__ . '/../..' . '/src/CustomAddDialog.php',
         'Kirby\\ComposerInstaller\\CmsInstaller' => __DIR__ . '/..' . '/getkirby/composer-installer/src/ComposerInstaller/CmsInstaller.php',
         'Kirby\\ComposerInstaller\\Installer' => __DIR__ . '/..' . '/getkirby/composer-installer/src/ComposerInstaller/Installer.php',
         'Kirby\\ComposerInstaller\\Plugin' => __DIR__ . '/..' . '/getkirby/composer-installer/src/ComposerInstaller/Plugin.php',
         'Kirby\\ComposerInstaller\\PluginInstaller' => __DIR__ . '/..' . '/getkirby/composer-installer/src/ComposerInstaller/PluginInstaller.php',
+        'Template' => __DIR__ . '/../..' . '/src/Template.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

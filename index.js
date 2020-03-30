@@ -110,7 +110,8 @@ const PAGE_CREATE_DIALOG = {
       this.$api
         .get(blueprintApi + '/add-fields', {section: section})
         .then(response => {
-          if(response.skipDialog){
+          if(response.options && response.options.skip){
+            this.options = response.options;
             this.submit(response);
             return;
           }
@@ -180,9 +181,10 @@ const PAGE_CREATE_DIALOG = {
       if (this.isValid()){
         var data = {};
         var route = '';
-
-        if(pageData.skipDialog){
+        
+        if(pageData.options && pageData.options.skip){
           data = pageData.page;
+          this.options = pageData.options;
         } else {
           data = {
             template: this.page.template,
@@ -197,7 +199,7 @@ const PAGE_CREATE_DIALOG = {
         this.$api
           .post(this.parent + "/children", data)
           .then(page => {
-            if(this.options && this.options.redirectToNewPage) {
+            if(this.options && this.options.redirect) {
               route = this.$api.pages.link(page.id);
             } else {
               route = page.parent ? this.$api.pages.link(page.parent.id) : '/';
@@ -208,7 +210,6 @@ const PAGE_CREATE_DIALOG = {
               message: ":)",
               event: "page.create"
             });
-            this.$router.go();
           })
           .catch(error => {
             this.$refs.dialog.error(error.message);
