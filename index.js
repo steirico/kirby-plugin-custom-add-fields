@@ -193,9 +193,8 @@ const PAGE_CREATE_DIALOG = {
 
         delete data.content.addFields;
         delete data.content.template;
-
-        this.$api
-          .post(this.parent + "/children", data)
+   
+        this.addPage(data)
           .then(page => {
             if(this.options && this.options.redirectToNewPage) {
               route = this.$api.pages.link(page.id);
@@ -216,6 +215,61 @@ const PAGE_CREATE_DIALOG = {
       } else {
         this.$refs.dialog.error("Form is not valid");
       }
+    },
+
+    addPage(data) {
+      var path = this.parent + "/children";
+      var options = {
+        method: "POST",
+        body: JSON.stringify(data),
+        credentials: "same-origin",
+        cache: "no-store",
+        headers: {
+          "x-requested-with": "xmlhttprequest",
+          "content-type": "application/json",
+        }
+      };
+  
+      if (this.$store.state.languages.current) {
+        options.headers["x-language"] = this.$store.state.languages.current.code;
+      }
+  
+      // add the csrf token to every request if it has been set
+      options.headers["x-csrf"] = window.panel.csrf;
+  
+      var id = "";
+    
+      return fetch(this.$api.config.endpoint + "/" + path, options)
+        .then(response => {
+          id = response.headers.get('X-CUSTOM-ADD-DIALOG-REDIRECT');
+          return response.text();
+        })
+        .then(text => {
+          try {
+            return JSON.parse(text);
+          } catch (e) {
+            throw new Error("The JSON response from the API could not be parsed. Please check your API connection.");
+          }
+        })
+        .then(json => {
+          if (json.status && json.status === "error") {
+            throw json;
+          }
+  
+          let response = json;
+  
+          if (json.data && json.type && json.type === "model") {
+            response = json.data;
+            if (id) {
+              response.id = id;
+            }
+          }
+  
+          return response;
+        })
+        .catch(error => {
+          throw error;
+        });
     }
   }
 };
