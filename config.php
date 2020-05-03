@@ -162,5 +162,11 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
                 $modelName::hookPageCreate($page);
             }
         }
+    ],
+
+    'pageMethods' => [
+        'pageCreateRedirect' => function() {
+            header('X-CUSTOM-ADD-DIALOG-REDIRECT: ' . $this->id());
+        }
     ]
 ]);
