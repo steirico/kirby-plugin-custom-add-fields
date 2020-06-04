@@ -169,6 +169,15 @@ If desired, redirect to the newly created page is possible on a per blueprint ba
 >           redirect: true
 >   ```
 
+Since `1.4.0`, one can get around the mentioned kirby issue by using the new helper page method `pageCreateRedirect()`.
+Call it on a changed page in order make redirects work:
+
+> ```php
+>   // change page slug
+>   $page->changeSlug(Str::slug($page->title()->value()));
+>   $page->pageCreateRedirect();
+>```
+
 ### Force a specific Template
 
 The template to be used for the new page can be forced by a field of the current page. By default,
