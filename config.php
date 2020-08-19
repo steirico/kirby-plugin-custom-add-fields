@@ -127,18 +127,22 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
                 }
             ],
             [
-                'pattern' => 'pages/(:any)/addfields/(:any)/(:any)/(:all?)',
+                'pattern' => [
+                    'site/(:any)/(:any)/(:any)/(:all?)',
+                    'pages/(:any)/addfields/(:any)/(:any)/(:all?)'
+                ],
                 'method'  => 'ALL',
                 'action'  => function (string $id, string $template, string $fieldName, string $path = null) {
-                    $object = $id == '' ? $this->site() : $this->page($id);
+                    $parent = ($id == '' || $id == 'addfields') ? null : $this->page($id);
+                    
                     $dummyPage = Page::factory(array(
                         'url'    => null,
                         'num'    => null,
-                        'parent' => $object,
-                        'site'   => $object->site(),
+                        'parent' => $parent,
+                        'site'   => $this->site(),
                         'slug' => 'dummy',
                         'template' => $template,
-                        'model' => $object,
+                        'model' => 'Page',
                         'draft' => true,
                         'content' => []
                     ));
