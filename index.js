@@ -3,7 +3,7 @@ const PAGE_CREATE_DIALOG = {
   template: `
     <k-dialog
       ref="dialog"
-      :button="$t('page.draft.create')"
+      :submit-button="$t('page.draft.create')"
       :notification="notification"
       size="medium"
       theme="positive"
