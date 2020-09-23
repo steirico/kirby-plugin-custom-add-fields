@@ -64,6 +64,28 @@ but put the definition in the property `addFields`.
 >           icon: url
 >   ```
 
+### Reusing and Extending
+
+As of v1.4.0 the plugin supports the `extends` key word for reusing and extending fields:
+
+> `/blueprints/pages/event.yml`:
+>
+>   ```yaml
+>  ....
+>   addFields:
+>       extends: fields/event-common
+>       title:
+>           label: Title
+>           type: text
+>       host:
+>           extends: fields/feg-contact
+>           label: Event Host
+>
+>   ```
+
+See the [kirby docs](https://getkirby.com/docs/guide/blueprints/extending-blueprints) for more information on
+reusing and extending field.
+
 ### Using custom Add Fields
 
 Values of custom add fields that correspond to fields of the page blueprint are
@@ -198,6 +220,8 @@ There are some known issues related to this plugin:
 
 MIT
 
-## Credits
+## Credits and Contributors
 
 - [Rico Steiner](https://github.com/steirico)
+- [Nils Hörrmann](https://github.com/nilshoerrmann)
+- [mvilskersts](https://github.com/mvilskersts)

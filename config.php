@@ -6,27 +6,15 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
     'options' => [
         'forcedTemplate.fieldName' => 'forcedTemplate'
     ],
-    'translations' => [
-        'en' => [
-            'kirby-plugin-custom-add-fields.addBasedOnTemplate' => 'Add a new page based on this template',
-        ],
-        'de' => [
-            'kirby-plugin-custom-add-fields.addBasedOnTemplate' => 'Neue Seite basierend auf diesem Template hinzufügen',
-        ],
-        'fr' => [
-            'kirby-plugin-custom-add-fields.addBasedOnTemplate' => 'Ajouter une nouvelle page basée sur ce modèle',
-        ],
-        'it' => [
-            'kirby-plugin-custom-add-fields.addBasedOnTemplate' => 'Aggiungere una nuova pagina basata su questo modello',
-        ]
-    ],
 
     'api' => [
         'routes' => [
             [
                 'pattern' => [
                     'site/children/blueprints/add-fields',
+                    'site/blueprints/add-fields',
                     'pages/(:any)/children/blueprints/add-fields',
+                    'pages/(:any)/blueprints/add-fields',
                 ],
                 'method' => 'GET',
                 'filter' => 'auth',
@@ -77,7 +65,7 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
                         }
                         try {
                             $props = Blueprint::load('pages/' . $template['name']);
-                            $addFields = A::get($props, 'addFields', null);
+                            $addFields = Blueprint::fieldsProps(A::get($props, 'addFields', null));
                             if($addFields){
                                 $dialogProperties = A::get($addFields, '__dialog', null);
                                 if($dialogProperties) {
@@ -86,7 +74,7 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
                                 } else {
                                     $redirectToNewPage = false;
                                 }
-                                
+
 
                                 if(!empty($addFields)) {
                                     $fieldOrder = array_change_key_case($addFields, CASE_LOWER);
