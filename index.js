@@ -3,7 +3,7 @@ const PAGE_CREATE_DIALOG = {
   template: `
     <k-dialog
       ref="dialog"
-      :button="$t('page.draft.create')"
+      :submit-button="$t('page.draft.create')"
       :notification="notification"
       size="medium"
       theme="positive"
@@ -12,7 +12,7 @@ const PAGE_CREATE_DIALOG = {
       <k-form
         ref="form"
         :fields="fields"
-        :novalidate="false"
+        :novalidate="true"
         :key="template"
         v-model="page"
         @submit="submit"
@@ -62,7 +62,7 @@ const PAGE_CREATE_DIALOG = {
 
       fields.template = {
         name: "template",
-        label: this.$t("kirby-plugin-custom-add-fields.addBasedOnTemplate"),
+        label: this.$t("template"),
         type: "select",
         disabled: this.templates.length === 1,
         required: true,
@@ -161,6 +161,7 @@ const PAGE_CREATE_DIALOG = {
         invalid = false;
 
       if(form) {
+        form.novalidate = false;
         errors = form.$refs.fields.errors;
         invalid = true;
 
@@ -179,7 +180,7 @@ const PAGE_CREATE_DIALOG = {
       if (this.isValid()){
         var data = {};
         var route = '';
-        
+
         if(pageData.skipDialog){
           data = pageData.page;
         } else {
@@ -192,7 +193,7 @@ const PAGE_CREATE_DIALOG = {
 
         delete data.content.addFields;
         delete data.content.template;
-   
+
         this.$api
           .post(this.parent + "/children", data)
           .then(page => {
