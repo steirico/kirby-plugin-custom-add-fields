@@ -25,8 +25,8 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
         'routes' => [
             [
                 'pattern' => [
-                    'site/children/blueprints/add-fields',
-                    'pages/(:any)/children/blueprints/add-fields',
+                    'site/blueprints/add-fields',
+                    'pages/(:any)/blueprints/add-fields',
                 ],
                 'method' => 'GET',
                 'filter' => 'auth',
@@ -86,7 +86,7 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
                                 } else {
                                     $redirectToNewPage = false;
                                 }
-                                
+
 
                                 if(!empty($addFields)) {
                                     $fieldOrder = array_change_key_case($addFields, CASE_LOWER);
