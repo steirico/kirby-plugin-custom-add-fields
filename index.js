@@ -27,7 +27,7 @@ const PAGE_CREATE_DIALOG = {
       section: null,
       templates: [],
       template: '',
-      page: this.emptyForm(),
+      page: {},
       addFields: {}
     };
   },
