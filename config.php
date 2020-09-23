@@ -25,7 +25,9 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
         'routes' => [
             [
                 'pattern' => [
+                    'site/children/blueprints/add-fields',
                     'site/blueprints/add-fields',
+                    'pages/(:any)/children/blueprints/add-fields',
                     'pages/(:any)/blueprints/add-fields',
                 ],
                 'method' => 'GET',
