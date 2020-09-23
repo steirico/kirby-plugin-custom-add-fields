@@ -161,6 +161,7 @@ const PAGE_CREATE_DIALOG = {
         invalid = false;
 
       if(form) {
+        form.novalidate = false;
         errors = form.$refs.fields.errors;
         invalid = true;
 
