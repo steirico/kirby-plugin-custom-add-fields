@@ -198,6 +198,8 @@ There are some known issues related to this plugin:
 
 MIT
 
-## Credits
+## Credits and Contributors
 
 - [Rico Steiner](https://github.com/steirico)
+- [Nils Hörrmann](https://github.com/nilshoerrmann)
+- [mvilskersts](https://github.com/mvilskersts)
