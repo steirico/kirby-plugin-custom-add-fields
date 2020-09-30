@@ -187,7 +187,7 @@ const PAGE_CREATE_DIALOG = {
           data = {
             template: this.page.template,
             slug: this.page.slug || Date.now(),
-            content: this.page
+            content: Object.assign({}, this.page)
           };
         }
 
