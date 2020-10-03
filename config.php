@@ -65,7 +65,7 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
                         }
                         try {
                             $props = Blueprint::load('pages/' . $template['name']);
-                            $addFields = Blueprint::fieldsProps(A::get($props, 'addFields', null));
+                            $addFields = A::get($props, 'addFields', null);
                             if($addFields){
                                 $dialogProperties = A::get($addFields, '__dialog', null);
                                 if($dialogProperties) {
@@ -85,7 +85,7 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
                                     }
                                     $attr = [
                                         'model' => $object,
-                                        'fields' => $addFields
+                                        'fields' => Blueprint::fieldsProps($addFields)
                                     ];
                                     $addSection = new Section('fields', $attr);
                                     $addFields = $addSection->fields();
