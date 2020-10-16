@@ -66,7 +66,7 @@ but put the definition in the property `addFields`.
 
 ### Reusing and Extending
 
-As of v1.4.0 the plugin supports the `extends` key word for reusing and extending fields:
+The plugin supports the `extends` keyword for reusing and extending fields:
 
 > `/blueprints/pages/event.yml`:
 >
@@ -78,13 +78,29 @@ As of v1.4.0 the plugin supports the `extends` key word for reusing and extendin
 >           label: Title
 >           type: text
 >       host:
->           extends: fields/feg-contact
+>           extends: fields/contact
 >           label: Event Host
 >
 >   ```
 
 See the [kirby docs](https://getkirby.com/docs/guide/blueprints/extending-blueprints) for more information on
 reusing and extending field.
+
+In such a manner, kirby's default add fields (`title` and `slug`) can be reused and extended:
+
+> `/blueprints/pages/book.yml`:
+>
+>   ```yaml
+>  ....
+>   addFields:
+>       # Reuse title and slug
+>       extends: fields/default-add-fields
+>
+>       # Add custom fields
+>       isbn:
+>           label: ISBN
+>           type: text
+>   ```
 
 ### Using custom Add Fields
 
