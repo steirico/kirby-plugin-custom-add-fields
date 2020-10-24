@@ -20,6 +20,9 @@
 </template>
 
 <script>
+
+const config = window.panel;
+
 export default {
   extends: 'k-page-create-dialog',
   data() {
@@ -62,15 +65,17 @@ export default {
         }
       }
 
-      fields.template = {
-        name: "template",
-        label: this.$t("template"),
-        type: "select",
-        disabled: this.templates.length === 1,
-        required: true,
-        icon: "code",
-        empty: false,
-        options: this.templates
+      if (this.templates.length > 1 || config.debug) {
+        fields.template = {
+          name: "template",
+          label: this.$t("template"),
+          type: "select",
+          disabled: this.templates.length === 1,
+          required: true,
+          icon: "code",
+          empty: false,
+          options: this.templates
+        }
       }
 
       Object.keys(fields).forEach(name => {
