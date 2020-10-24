@@ -22,6 +22,11 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
                 'method' => 'GET',
                 'filter' => 'auth',
                 'action'  => function (string $id = '') {
+                    $version = preg_replace('/.*(\d+\.\d+\.\d+).*/m', '$1', $this->kirby()->version());
+                    if (version_compare($version, '3.5.0', '<')) {
+                        throw new Exception('The custom add fields plugins requires Kirby version 3.5.0 or higher. For older Kirby version install version 1.4.1 od the plugin.'); 
+                    }
+
                     $result = [];
                     $object = $id == '' ? $this->site() : $this->page($id);
                     $templates = $object->blueprints($this->requestQuery('section'));
