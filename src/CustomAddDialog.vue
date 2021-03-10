@@ -200,6 +200,7 @@ export default {
 
         delete data.content.addFields;
         delete data.content.template;
+        delete data.content.slug;
 
         this.$api
           .post(this.parent + "/children", data)
