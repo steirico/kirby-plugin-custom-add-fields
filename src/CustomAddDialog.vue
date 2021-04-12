@@ -65,7 +65,7 @@ export default {
         }
       }
 
-      if (this.templates.length > 1 || config.debug) {
+      if (this.templates.length > 1 || this.forceTemplateSelection || config.debug) {
         fields.template = {
           name: "template",
           label: this.$t("template"),
@@ -121,7 +121,8 @@ export default {
             this.submit(response);
             return;
           }
-          this.templates = response.map(blueprint => {
+          this.forceTemplateSelection = response.forceTemplateSelection || false;
+          this.templates = response.templates.map(blueprint => {
             return {
               value: blueprint.name,
               text: blueprint.title,

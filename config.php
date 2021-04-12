@@ -4,7 +4,8 @@ use Kirby\Cms\Section;
 
 Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
     'options' => [
-        'forcedTemplate.fieldName' => 'forcedTemplate'
+        'forcedTemplate.fieldName' => 'forcedTemplate',
+        'forceTemplateSelectionField' => null
     ],
     'blueprints' => [
         'fields/default-add-fields' => __DIR__ . '/blueprints/fields/default-add-fields.yml',
@@ -22,11 +23,6 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
                 'method' => 'GET',
                 'filter' => 'auth',
                 'action'  => function (string $id = '') {
-                    $version = preg_replace('/.*(\d+\.\d+\.\d+).*/m', '$1', $this->kirby()->version());
-                    if (version_compare($version, '3.5.0', '<')) {
-                        throw new Exception('The custom add fields plugins requires Kirby version 3.5.0 or higher. For older Kirby version install version 1.4.1 od the plugin.'); 
-                    }
-
                     $result = [];
                     $object = $id == '' ? $this->site() : $this->page($id);
                     $templates = $object->blueprints($this->requestQuery('section'));
@@ -66,6 +62,16 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
                             return $result;
                         }
                     }
+
+                    $forceTemplateSelection = option('steirico.kirby-plugin-custom-add-fields.forceTemplateSelectionField');
+                    if(!is_bool($forceTemplateSelection)) {
+                        $version = preg_replace('/.*(\d+\.\d+\.\d+).*/m', '$1', $this->kirby()->version());
+                        $forceTemplateSelection = version_compare($version, '3.5.0', '<');
+                    }
+                    $result = array(
+                        'forceTemplateSelection' => $forceTemplateSelection,
+                        'templates' => []
+                    );
 
                     foreach ($templates as $template) {
                         if($hasForcedTemplate && $template['name'] != $forcedTemplate){
@@ -110,7 +116,7 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
                             } else {
                                 $redirectToNewPage = true;
                             }
-                            array_push($result, [
+                            array_push($result['templates'], [
                                 'name'  => $template['name'],
                                 'title' => $template['title'],
                                 'addFields' => $addFields,
