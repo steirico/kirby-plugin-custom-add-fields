@@ -215,6 +215,22 @@ There are some known issues related to this plugin:
   additional requests to the backend. Although the pages field works as of v1.1.1, such fields may not work with this plugin.
   Feel free to file an [issue](https://github.com/steirico/kirby-plugin-custom-add-fields/issues) if you
   encounter a broken field.
+- When installed, the `kirby3-security-headers` adds CSP headers to the panel, [breaking this plugin](https://github.com/steirico/kirby-plugin-custom-add-fields/issues/37). As a workaround, you may disable it like this:
+  ```php
+'enabled' => function () {
+    # Panel check, borrowed from @bnomei's `security-headers`
+    $isPanel = strpos(
+        kirby()->request()->url()->toString(),
+        kirby()->urls()->panel
+    ) !== false;
+
+    if ($isPanel) {
+        return false;
+    }
+
+    return true; // or 'force'
+},
+  ```
 
 ## License
 
