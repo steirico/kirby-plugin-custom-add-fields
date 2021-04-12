@@ -223,6 +223,28 @@ Beside setting the property `skip: true` one has to define the template for the 
 This can be achieved either by setting the property `forcedTemplate` or by the means
 described in [Force a specific Template](#Force-a-specific-Template).
 
+## Show / hide Template Select
+
+As of Kirby 3.5.0 the add dialog's template select is hidden if only one option is available (except in debug mode).
+By default, the plugin imitates this behavior in respect of the Kirby version.
+
+Independently of the Kirby version in use, the plugins allows control/force a certain behavior by the
+[kirby option](https://getkirby.com/docs/guide/configuration#the-config-php) `forceTemplateSelectionField`:
+
+> `/site/config/config.php`:
+>
+> ```php
+> <?php
+>
+> return [
+>     // exitsing configurations
+>     'steirico.kirby-plugin-custom-add-fields.forceTemplateSelectionField' => true
+> ];
+>```
+
+Setting the option to `true` will always make the add dialog show the template select.
+Setting it to `false` will hide the template select if only one template is available.
+
 ## Know issues
 
 There are some known issues related to this plugin:
