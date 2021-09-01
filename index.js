@@ -199,7 +199,11 @@ const PAGE_CREATE_DIALOG = {
           .post(this.parent + "/children", data)
           .then(page => {
             if(this.options && this.options.redirectToNewPage) {
-              route = this.$api.pages.link(page.id);
+              if(this.options.redirectToNewPage === true) {
+                route = this.$api.pages.link(page.id);
+              } else if (this.options.redirectToNewPage !== false) {
+                route = this.$api.pages.link(this.options.redirectToNewPage);
+              }
             } else {
               route = page.parent ? this.$api.pages.link(page.parent.id) : '/';
             }
@@ -209,7 +213,6 @@ const PAGE_CREATE_DIALOG = {
               message: ":)",
               event: "page.create"
             });
-            this.$router.go();
           })
           .catch(error => {
             this.$refs.dialog.error(error.message);
