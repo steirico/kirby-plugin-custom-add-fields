@@ -158,7 +158,7 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
         'page.create:after' => function ($page) {
             $modelName = a::get(Page::$models, $page->intendedTemplate()->name());
 
-            if(method_exists($modelName, 'hookPageCreate')){
+            if($modelName && method_exists($modelName, 'hookPageCreate')){
                 $modelName::hookPageCreate($page);
             }
         }
