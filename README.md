@@ -185,7 +185,18 @@ If desired, redirect to the newly created page is possible on a per blueprint ba
 >           redirect: true
 >   ```
 
-If redirection to another page after creation is required, `redirect` can be set to that page id.
+If redirection to an existing page after creation is required, `redirect` can be set to that page id.
+
+> `/blueprints/pages/parent.yml`:
+>
+>   ```yaml
+>   title: Parent Blueprint which skips the Add Dialog
+>
+>   # custom add fields definition
+>   addFields:
+>       __dialog:
+>           redirect: my/existing/page/id
+>   ```
 
 ### Force a specific Template
 
@@ -255,10 +266,11 @@ There are some known issues related to this plugin:
   additional requests to the backend. Although the pages field works as of v1.1.1, such fields may not work with this plugin.
   Feel free to file an [issue](https://github.com/steirico/kirby-plugin-custom-add-fields/issues) if you
   encounter a broken field.
-- When installed, the `kirby3-security-headers` adds CSP headers to the panel, [breaking this plugin](https://github.com/steirico/kirby-plugin-custom-add-fields/issues/37). As a workaround, you may disable it like this:
+- When installed, the [kirby3-security-headers](https://github.com/bnomei/kirby3-security-headers) adds CSP headers to the panel, [breaking this plugin](https://github.com/steirico/kirby-plugin-custom-add-fields/issues/37). As a workaround, you may disable it like this:
   ```php
-'enabled' => function () {
+  'bnomei.securityheaders.enabled' => function () {
     # Panel check, borrowed from @bnomei's `security-headers`
+    # See https://github.com/bnomei/kirby3-security-headers/issues/18#issuecomment-709985170
     $isPanel = strpos(
         kirby()->request()->url()->toString(),
         kirby()->urls()->panel
@@ -269,7 +281,7 @@ There are some known issues related to this plugin:
     }
 
     return true; // or 'force'
-},
+  }
   ```
 
 ## License
@@ -281,3 +293,4 @@ MIT
 - [Rico Steiner](https://github.com/steirico)
 - [Nils Hörrmann](https://github.com/nilshoerrmann)
 - [mvilskersts](https://github.com/mvilskersts)
+- [Martin Folkers](https://github.com/S1SYPHOS)
