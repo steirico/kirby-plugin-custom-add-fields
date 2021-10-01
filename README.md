@@ -185,6 +185,8 @@ If desired, redirect to the newly created page is possible on a per blueprint ba
 >           redirect: true
 >   ```
 
+If redirection to another page after creation is required, `redirect` can be set to that page id.
+
 ### Force a specific Template
 
 The template to be used for the new page can be forced by a field of the current page. By default,
