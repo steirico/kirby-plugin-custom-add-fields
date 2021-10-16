@@ -1,166 +1,60 @@
 const config = window.panel;
 
 const PAGE_CREATE_DIALOG = {
-  extends: 'k-page-create-dialog',
+  extends: 'k-form-dialog',
   template: `
     <k-dialog
       ref="dialog"
-      :submit-button="$t('page.draft.create')"
-      :notification="notification"
-      size="medium"
-      theme="positive"
+      v-bind="$props"
+      @cancel="$emit('cancel')"
+      @close="$emit('close')"
+      @ready="$emit('ready')"
       @submit="$refs.form.submit()"
     >
+      <template v-if="text">
+        <!-- eslint-disable-next-line vue/no-v-html -->
+        <k-text v-html="text" />
+      </template>
       <k-form
+        v-if="hasFields"
         ref="form"
+        :value="model"
         :fields="fields"
         :novalidate="true"
-        :key="template"
-        v-model="page"
         @submit="submit"
         @input="input"
       />
+      <k-box v-else theme="negative">
+        This form dialog has no fields
+      </k-box>
     </k-dialog>
   `,
-  data() {
-    return {
-      notification: null,
-      parent: null,
-      section: null,
-      templates: [],
-      template: '',
-      page: {},
-      addFields: {}
-    };
-  },
-
-  computed: {
-    fields() {
-      var
-        fields = {},
-        field = {},
-        endpoint = this.$route.path,
-        section = 'addFields';
-
-      if(this.addFields) {
-        fields = this.addFields;
-      } else {
-        fields = {
-          title: {
-            label: this.$t("title"),
-            type: "text",
-            required: true,
-            icon: "title"
-          },
-          slug: {
-            label: this.$t("slug"),
-            type: "text",
-            required: true,
-            counter: false,
-            icon: "url"
-          }
-        }
-      }
-
-      if (this.templates.length > 1 || this.forceTemplateSelection || config.debug) {
-        fields.template = {
-          name: "template",
-          label: this.$t("template"),
-          type: "select",
-          disabled: this.templates.length === 1,
-          required: true,
-          icon: "code",
-          empty: false,
-          options: this.templates
-        }
-      }
-
-      Object.keys(fields).forEach(name => {
-        field = fields[name];
-
-        if (name != "title" && name != "template" && this.page[name] === undefined){
-          if (field.default !== null && field.default !== undefined) {
-            this.$set(this.page, name, this.$helper.clone(field.default));
-          } else {
-            this.$set(this.page, name, null);
-          }
-        }
-
-        if (name === "title" && this.page[name] === "") {
-          if (field.default !== null && field.default !== undefined) {
-            this.$set(this.page, name, this.$helper.clone(field.default));
-          } else {
-            this.$set(this.page, name, "");
-          }
-        }
-
-        field.section = section;
-        field.endpoints = {
-          field: endpoint + "/addfields/" + this.template + "/" + name,
-          section: endpoint + "/addsections/" + this.template + "/" + section,
-          model: endpoint
-        };
-      });
-
-      return fields;
+  props: {
+    templateData: {
+      type: Object,
+      default: {}
     }
   },
 
   methods: {
-    open(parent, blueprintApi, section) {
-      this.parent  = parent;
-      this.section = section;
-
-      this.$api
-        .get(blueprintApi + '/add-fields', {section: section})
-        .then(response => {
-          if(response.skipDialog){
-            this.submit(response);
-            return;
-          }
-          this.forceTemplateSelection = response.forceTemplateSelection || false;
-          this.templates = response.templates.map(blueprint => {
-            return {
-              value: blueprint.name,
-              text: blueprint.title,
-              addFields: blueprint.addFields,
-              options: blueprint.options
-            };
-          });
-
-          if (this.templates[0]) {
-            this.page.template = this.templates[0].value;
-            this.template = this.templates[0].value;
-            this.addFields = this.templates[0].addFields;
-            this.options = this.templates[0].options;
-          }
-
-          this.$refs.dialog.open();
-        })
-        .catch(error => {
-          this.$store.dispatch("notification/error", error);
-        });
-    },
-
     input() {
-      if(this.page.template !== this.template){
+      if(this.oldTemplate !== this.value.template){
         var
           oTemplate = {},
-          template = this.page.template;
+          template = this.value.template;
 
-        this.template  = template;
+        this.oldTemplate  = template;
 
-        oTemplate = this.templates.find(function(tpl){
-          return tpl.value === template;
-        });
-        this.addFields = oTemplate.addFields;
-        this.options = oTemplate.options;
-        this.$set(this.page, "template", template);
+        oTemplate = this.$props.templateData[template];
+        this.$props.fields = oTemplate;
       }
     },
 
     isValid() {
-      var
+      console.log("isValid");
+      return true;
+      // TODO: Trigger validation
+      /*var
         form = this.$refs.form,
         errors = {},
         invalid = false;
@@ -178,50 +72,13 @@ const PAGE_CREATE_DIALOG = {
         return !invalid;
       } else {
         return !invalid;
-      }
+      }*/
     },
 
-    submit(pageData) {
+    submit() {
+      console.log("submit");
       if (this.isValid()){
-        var data = {};
-        var route = '';
-
-        if(pageData.skipDialog){
-          data = pageData.page;
-        } else {
-          data = {
-            template: this.page.template,
-            slug: this.page.slug || Date.now(),
-            content: Object.assign({}, this.page)
-          };
-        }
-
-        delete data.content.addFields;
-        delete data.content.template;
-        delete data.content.slug;
-
-        this.$api
-          .post(this.parent + "/children", data)
-          .then(page => {
-            if(this.options && this.options.redirectToNewPage) {
-              if(this.options.redirectToNewPage === true) {
-                route = this.$api.pages.link(page.id);
-              } else if (this.options.redirectToNewPage !== false) {
-                route = this.$api.pages.link(this.options.redirectToNewPage);
-              }
-            } else {
-              route = page.parent ? this.$api.pages.link(page.parent.id) : '/';
-            }
-
-            this.success({
-              route: route,
-              message: ":)",
-              event: "page.create"
-            });
-          })
-          .catch(error => {
-            this.$refs.dialog.error(error.message);
-          });
+        this.$parent.onSubmit(this.value);
       } else {
         this.$refs.dialog.error("Form is not valid");
       }

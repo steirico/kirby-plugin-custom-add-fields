@@ -1,6 +1,9 @@
 <?php
 use Kirby\Cms\Blueprint;
 use Kirby\Cms\Section;
+use Kirby\Cms\Find;
+use Kirby\Panel\Field;
+
 
 Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
     'options' => [
@@ -11,88 +14,91 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
         'fields/default-add-fields' => __DIR__ . '/blueprints/fields/default-add-fields.yml',
     ],
 
-    'api' => [
-        'routes' => [
-            [
-                'pattern' => [
-                    'site/children/blueprints/add-fields',
-                    'site/blueprints/add-fields',
-                    'pages/(:any)/children/blueprints/add-fields',
-                    'pages/(:any)/blueprints/add-fields',
-                ],
-                'method' => 'GET',
-                'filter' => 'auth',
-                'action'  => function (string $id = '') {
-                    $result = [];
-                    $object = $id == '' ? $this->site() : $this->page($id);
-                    $templates = $object->blueprints($this->requestQuery('section'));
+    'areas' => [
+        'site' => function ($kirby) {
+            return [
+                'dialogs' => [
+                    // create a new page
+                    'page.create' => [
+                        'pattern' => 'pages/create',
+                        'load' => function () {
+                            $id = get('parent', 'site');
+                            $object = Find::parent($id);
+                            $section = get('section');
+                            $templates = $object->blueprints($section);
 
-                    $parentProps = Blueprint::load($object->blueprint()->name());
-                    $parentAddFields = A::get($parentProps, 'addFields', null);
+                            $parentProps = Blueprint::load($object->blueprint()->name());
+                            $parentAddFields = A::get($parentProps, 'addFields', null);
 
-                    $dialogProperties = A::get($parentAddFields, '__dialog', null);
-                    $skipDialog  = A::get($dialogProperties, 'skip', false);
+                            $dialogProperties = A::get($parentAddFields, '__dialog', null);
+                            $skipDialog  = A::get($dialogProperties, 'skip', false);
 
-                    $forcedTemplateFieldName = option('steirico.kirby-plugin-custom-add-fields.forcedTemplate.fieldName');
-                    $forcedTemplateFieldName = $forcedTemplateFieldName ? $forcedTemplateFieldName : '';
-                    $hasForcedTemplate = $object->content()->has($forcedTemplateFieldName);
-                    $forcedTemplate = '';
+                            $forcedTemplateFieldName = option('steirico.kirby-plugin-custom-add-fields.forcedTemplate.fieldName');
+                            $forcedTemplateFieldName = $forcedTemplateFieldName ? $forcedTemplateFieldName : '';
+                            $hasForcedTemplate = $object->content()->has($forcedTemplateFieldName);
+                            $forcedTemplate = '';
 
-                    if($hasForcedTemplate){
-                        $forcedTemplate = $object->{$forcedTemplateFieldName}()->value();
-                    }
+                            if($hasForcedTemplate){
+                                $forcedTemplate = $object->{$forcedTemplateFieldName}()->value();
+                            }
 
-                    $forcedTemplate = $forcedTemplate != '' ? $forcedTemplate : A::get($dialogProperties, 'forcedTemplate', '');
+                            $forcedTemplate = $forcedTemplate != '' ? $forcedTemplate : A::get($dialogProperties, 'forcedTemplate', '');
 
-                    if ($skipDialog) {
-                        if ($forcedTemplate == ''){
-                            throw new Exception("Set 'forcedTemplate' in order to skip add dialog.");
-                        } else {
-                            $now = time();
-                            $result = array(
-                                'skipDialog' => true,
-                                'page' => array(
-                                    'template'  => $forcedTemplate,
-                                    'slug' => $now,
-                                    'content' => array (
-                                        'title' => $now,
-                                    )
-                                )
-                            );
-                            return $result;
-                        }
-                    }
-
-                    $forceTemplateSelection = option('steirico.kirby-plugin-custom-add-fields.forceTemplateSelectionField');
-                    if(!is_bool($forceTemplateSelection)) {
-                        $version = preg_replace('/.*(\d+\.\d+\.\d+).*/m', '$1', $this->kirby()->version());
-                        $forceTemplateSelection = version_compare($version, '3.5.0', '<');
-                    }
-                    $result = array(
-                        'forceTemplateSelection' => $forceTemplateSelection,
-                        'templates' => []
-                    );
-
-                    foreach ($templates as $template) {
-                        if($hasForcedTemplate && $template['name'] != $forcedTemplate){
-                            continue;
-                        }
-                        try {
-                            $props = Blueprint::load('pages/' . $template['name']);
-                            $addFields = A::get($props, 'addFields', null);
-                            if($addFields){
-                                $dialogProperties = A::get($addFields, '__dialog', null);
-                                if($dialogProperties) {
-                                    $redirectToNewPage = A::get($addFields['__dialog'], 'redirect', false);
-                                    unset($addFields['__dialog']);
+                            if ($skipDialog) {
+                                if ($forcedTemplate == ''){
+                                    throw new Exception("Set 'forcedTemplate' in order to skip add dialog.");
                                 } else {
-                                    $redirectToNewPage = false;
+                                    //TODO: Handle Skip dialog
+                                    /*$now = time();
+                                    $result = array(
+                                        'skipDialog' => true,
+                                        'page' => array(
+                                            'template'  => $forcedTemplate,
+                                            'slug' => $now,
+                                            'content' => array (
+                                                'title' => $now,
+                                            )
+                                        )
+                                    );
+                                    return $result;*/
                                 }
+                            }
 
+                            $forceTemplateSelection = option('steirico.kirby-plugin-custom-add-fields.forceTemplateSelectionField');
+                            if(!is_bool($forceTemplateSelection)) {
+                                $version = preg_replace('/.*(\d+\.\d+\.\d+).*/m', '$1', kirby()->version());
+                                $forceTemplateSelection = version_compare($version, '3.5.0', '<');
+                            }
 
-                                if(!empty($addFields)) {
+                            $templateSelectField = [];
+                            if ($forceTemplateSelection || count($templates) > 1 || option('debug') === true) {
+                                $templateSelectField = Field::template($templates, [
+                                    'required' => true
+                                ]);
+                            } else {
+                                $templateSelectField = Field::hidden();
+                            }
+
+                            $templateData = array();
+                            $firstTemplate = '';
+
+                            foreach ($templates as $template) {
+                                if($hasForcedTemplate && $template['name'] != $forcedTemplate){
+                                    continue;
+                                }
+                                try {
+                                    $props = Blueprint::load('pages/' . $template['name']);
+                                    $addFields = A::get($props, 'addFields', null);
+                                    unset($addFields['__dialog']);
+
+                                    if(empty($addFields)) {
+                                        $addFields = Blueprint::load("fields/default-add-fields");
+                                        $addFields = A::get($addFields, 'fields', null);
+                                    }
+
                                     $fieldProps = Blueprint::fieldsProps($addFields);
                                     $fieldOrder = array_change_key_case($fieldProps, CASE_LOWER);
+                                    // Todo: Check how title field is handled in Kirby 3.6
                                     $title = A::get($fieldProps, 'title', null);
                                     if($title) {
                                         $fieldProps["kirby-plugin-custom-add-fields-title"] = $title;
@@ -111,30 +117,87 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
                                     }
 
                                     $addFields = array_replace($fieldOrder, $addFields);
-                                }
+                                    $addFields['template'] = $templateSelectField;
+                                    $addFields['parent'] = Field::hidden();
 
-                            } else {
-                                $redirectToNewPage = true;
+                                    $templateName = $template['name'];
+                                    
+                                    foreach($addFields as $name => $addField) {
+                                        // TODO POC Setting endpoints
+                                        $addFields[$name]['endpoints'] = [
+                                            'field' =>  $id . "/addfields/" . $templateName . "/" . $name,
+                                            'section' => $id . "/addsections/" . $templateName . "/" . $section,
+                                            'model' => $id
+                                        ];
+
+                                        if($name == 'slug') {
+                                            $addFields[$name]['path'] = empty($object->id()) === false ? '/' . $object->id() . '/' : '/';
+                                        }
+                                    }
+
+                                    $firstTemplate = $firstTemplate == '' ? $templateName : $firstTemplate;
+                                    $templateData[$templateName] = $addFields;
+                                } catch (Throwable $e) {}
                             }
-                            array_push($result['templates'], [
-                                'name'  => $template['name'],
-                                'title' => $template['title'],
-                                'addFields' => $addFields,
-                                'options'=> [
-                                    'redirectToNewPage'=> $redirectToNewPage
-                                ],
-                                'parentPage' => $id
+                            return [
+                                'component' => 'k-page-create-dialog',
+                                'props' => [
+                                    'fields' => $templateData[$firstTemplate],
+                                    'submitButton' => t('page.draft.create'),
+                                    'templateData' => $templateData,
+                                    'value' => [
+                                        'parent'   => $id,
+                                        'template' => $firstTemplate
+                                    ]
+
+                                ]
+                            ];
+
+                        },
+                        'submit' => function () {
+                            // TODO: Handle redirects
+                            /*
+                            $dialogProperties = A::get($addFields, '__dialog', null);
+                            if($dialogProperties) {
+                                $redirectToNewPage = A::get($addFields['__dialog'], 'redirect', false);
+                                unset($addFields['__dialog']);
+                            } else {
+                                $redirectToNewPage = false;
+                            }
+                            */
+
+                            $content = get();
+                            unset($content['slug']);
+                            unset($content['template']);
+
+                            $slug = get('slug');
+                            $slug = $slug == '' ? time() : $slug;
+
+
+                            $page = Find::parent(get('parent', 'site'))->createChild([
+                                'content'  => $content,
+                                'slug'     => $slug,
+                                'template' => get('template'),
                             ]);
-                        } catch (Throwable $e) {
+
+                            return [
+                                'event'    => 'page.create',
+                                'redirect' => $page->panel()->url(true)
+                            ];
                         }
-                    }
-                    return $result;
-                }
-            ],
+                    ]
+                ]
+            ];
+        }
+    ],
+
+    'api' => [
+        'routes' => [
             [
                 'pattern' => 'pages/(:any)/addsections/(:any)',
                 'method'  => 'GET',
                 'action'  => function (string $id, string $sectionName) {
+                    // Todo: Test pages field
                     if ($section = $this->page($id)->blueprint()->section($sectionName)) {
                         return $section->toResponse();
                     }
@@ -144,6 +207,7 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
                 'pattern' => 'pages/(:any)/addfields/(:any)/(:any)/(:all?)',
                 'method'  => 'ALL',
                 'action'  => function (string $id, string $template, string $fieldName, string $path = null) {
+                    // Todo: Test pages field
                     $object = $id == '' ? $this->site() : $this->page($id);
                     $dummyPage = Page::factory(array(
                         'url'    => null,
