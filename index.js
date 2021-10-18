@@ -51,28 +51,31 @@ const PAGE_CREATE_DIALOG = {
     },
 
     isValid() {
-      console.log("isValid");
-      return true;
-      // TODO: Trigger validation
-      /*var
+      var
         form = this.$refs.form,
+        fieldset = {},
+        fields = {},
         errors = {},
         invalid = false;
 
       if(form) {
         form.novalidate = false;
-        errors = form.$refs.fields.errors;
+        fieldset = form.$refs.fields
+        fields = fieldset.$refs
+        errors = fieldset.errors;
         invalid = true;
 
-        Object.keys(errors).some(field => {
-          var error = errors[field];
+        Object.keys(fields).some(fieldName => {
+          var
+            error = errors[fieldName];
+
           invalid = error.$pending || error.$invalid || error.$error;
           return invalid;
         });
         return !invalid;
       } else {
         return !invalid;
-      }*/
+      }
     },
 
     submit() {
@@ -80,7 +83,7 @@ const PAGE_CREATE_DIALOG = {
       if (this.isValid()){
         this.$parent.onSubmit(this.value);
       } else {
-        this.$refs.dialog.error("Form is not valid");
+        this.$refs.dialog.error(this.$t("error.form.incomplete"));
       }
     }
   }
