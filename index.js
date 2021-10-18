@@ -1,3 +1,5 @@
+const config = window.panel;
+
 const PAGE_CREATE_DIALOG = {
   extends: 'k-page-create-dialog',
   template: `
@@ -60,15 +62,17 @@ const PAGE_CREATE_DIALOG = {
         }
       }
 
-      fields.template = {
-        name: "template",
-        label: this.$t("template"),
-        type: "select",
-        disabled: this.templates.length === 1,
-        required: true,
-        icon: "code",
-        empty: false,
-        options: this.templates
+      if (this.templates.length > 1 || this.forceTemplateSelection || config.debug) {
+        fields.template = {
+          name: "template",
+          label: this.$t("template"),
+          type: "select",
+          disabled: this.templates.length === 1,
+          required: true,
+          icon: "code",
+          empty: false,
+          options: this.templates
+        }
       }
 
       Object.keys(fields).forEach(name => {
@@ -114,7 +118,8 @@ const PAGE_CREATE_DIALOG = {
             this.submit(response);
             return;
           }
-          this.templates = response.map(blueprint => {
+          this.forceTemplateSelection = response.forceTemplateSelection || false;
+          this.templates = response.templates.map(blueprint => {
             return {
               value: blueprint.name,
               text: blueprint.title,
@@ -199,7 +204,11 @@ const PAGE_CREATE_DIALOG = {
           .post(this.parent + "/children", data)
           .then(page => {
             if(this.options && this.options.redirectToNewPage) {
-              route = this.$api.pages.link(page.id);
+              if(this.options.redirectToNewPage === true) {
+                route = this.$api.pages.link(page.id);
+              } else if (this.options.redirectToNewPage !== false) {
+                route = this.$api.pages.link(this.options.redirectToNewPage);
+              }
             } else {
               route = page.parent ? this.$api.pages.link(page.parent.id) : '/';
             }
@@ -209,7 +218,6 @@ const PAGE_CREATE_DIALOG = {
               message: ":)",
               event: "page.create"
             });
-            this.$router.go();
           })
           .catch(error => {
             this.$refs.dialog.error(error.message);

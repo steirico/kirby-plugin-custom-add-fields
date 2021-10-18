@@ -4,7 +4,11 @@ use Kirby\Cms\Section;
 
 Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
     'options' => [
-        'forcedTemplate.fieldName' => 'forcedTemplate'
+        'forcedTemplate.fieldName' => 'forcedTemplate',
+        'forceTemplateSelectionField' => null
+    ],
+    'blueprints' => [
+        'fields/default-add-fields' => __DIR__ . '/blueprints/fields/default-add-fields.yml',
     ],
 
     'api' => [
@@ -59,6 +63,16 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
                         }
                     }
 
+                    $forceTemplateSelection = option('steirico.kirby-plugin-custom-add-fields.forceTemplateSelectionField');
+                    if(!is_bool($forceTemplateSelection)) {
+                        $version = preg_replace('/.*(\d+\.\d+\.\d+).*/m', '$1', $this->kirby()->version());
+                        $forceTemplateSelection = version_compare($version, '3.5.0', '<');
+                    }
+                    $result = array(
+                        'forceTemplateSelection' => $forceTemplateSelection,
+                        'templates' => []
+                    );
+
                     foreach ($templates as $template) {
                         if($hasForcedTemplate && $template['name'] != $forcedTemplate){
                             continue;
@@ -77,15 +91,15 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
 
 
                                 if(!empty($addFields)) {
-                                    $fieldOrder = array_change_key_case($addFields, CASE_LOWER);
-
-                                    $title = A::get($addFields, 'title', null);
+                                    $fieldProps = Blueprint::fieldsProps($addFields);
+                                    $fieldOrder = array_change_key_case($fieldProps, CASE_LOWER);
+                                    $title = A::get($fieldProps, 'title', null);
                                     if($title) {
-                                        $addFields["kirby-plugin-custom-add-fields-title"] = $title;
+                                        $fieldProps["kirby-plugin-custom-add-fields-title"] = $title;
                                     }
                                     $attr = [
                                         'model' => $object,
-                                        'fields' => Blueprint::fieldsProps($addFields)
+                                        'fields' => $fieldProps
                                     ];
                                     $addSection = new Section('fields', $attr);
                                     $addFields = $addSection->fields();
@@ -102,7 +116,7 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
                             } else {
                                 $redirectToNewPage = true;
                             }
-                            array_push($result, [
+                            array_push($result['templates'], [
                                 'name'  => $template['name'],
                                 'title' => $template['title'],
                                 'addFields' => $addFields,
@@ -158,7 +172,7 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
         'page.create:after' => function ($page) {
             $modelName = a::get(Page::$models, $page->intendedTemplate()->name());
 
-            if(method_exists($modelName, 'hookPageCreate')){
+            if($modelName && method_exists($modelName, 'hookPageCreate')){
                 $modelName::hookPageCreate($page);
             }
         }

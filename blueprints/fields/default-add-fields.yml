@@ -1,0 +1,13 @@
+type: group
+fields:
+  title:
+    label: title
+    type: text
+    required: true
+    icon: title
+  slug:
+    label: "slug"
+    type: text
+    required: true
+    counter: false
+    icon: url
