@@ -88,7 +88,6 @@ class Plugin {
 
                 $fieldProps = Blueprint::fieldsProps($addFields);
                 $fieldOrder = array_change_key_case($fieldProps, CASE_LOWER);
-                // Todo: Check how title field is handled in Kirby 3.6
                 $title = A::get($fieldProps, 'title', null);
                 if($title) {
                     $fieldProps["kirby-plugin-custom-add-fields-title"] = $title;
@@ -137,7 +136,9 @@ class Plugin {
                 'templateData' => $templateData,
                 'value' => [
                     'parent'   => $id,
-                    'template' => $firstTemplate
+                    'template' => $firstTemplate,
+                    'title' => "",
+                    'slug' => ""
                 ]
 
             ]
