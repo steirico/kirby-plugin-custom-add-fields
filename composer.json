@@ -22,7 +22,10 @@
     "autoload": {
         "files": [
             "config.php"
-        ]
+        ],
+        "psr-4": {
+            "Steineri\\CustomAddFields\\": "src/"
+        }
     },
 
     "require": {
