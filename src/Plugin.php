@@ -151,17 +151,7 @@ class Plugin {
     }
 
     static public function submitPageCreate($content) {
-        // TODO: Handle redirects
-        /*
-        $dialogProperties = A::get($addFields, '__dialog', null);
-        if($dialogProperties) {
-            $redirectToNewPage = A::get($addFields['__dialog'], 'redirect', false);
-            unset($addFields['__dialog']);
-        } else {
-            $redirectToNewPage = false;
-        }
-        */
-
+        // Prepare content
         $slug = $content['slug'];
         $slug = $slug == '' ? time() : $slug;
         $template = $content['template'];
@@ -169,15 +159,31 @@ class Plugin {
         unset($content['slug']);
         unset($content['template']);
 
-        $page = Find::parent(get('parent', 'site'))->createChild([
+        // Add Page
+        $parent = Find::parent(get('parent', 'site'));
+        $page = $parent->createChild([
             'content'  => $content,
             'slug'     => $slug,
             'template' => $template,
         ]);
 
+        // Evaluate redirect
+        $props = $page->blueprint()->toArray();
+        $addFields = A::get($props, 'addFields', null);
+        $dialogProperties = A::get($addFields, '__dialog', null);
+        $redirectTarget = $parent->panel()->url(true);
+        if($dialogProperties) {
+            $redirectConfig = A::get($addFields['__dialog'], 'redirect', false);
+            if(is_string($redirectConfig)){
+                $redirectTarget = kirby()->page($redirectConfig)->panel()->url(true);
+            } else if($redirectConfig == true){
+                $redirectTarget = $page->panel()->url(true);
+            }
+        }
+
         return [
             'event'    => 'page.create',
-            'redirect' => $page->panel()->url(true)
+            'redirect' => $redirectTarget
         ];
     }
 }
