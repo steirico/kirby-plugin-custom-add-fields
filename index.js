@@ -8,15 +8,14 @@ const PAGE_CREATE_DIALOG = {
       v-bind="$props"
       @cancel="$emit('cancel')"
       @close="$emit('close')"
-      @ready="$emit('ready')"
+      @ready="ready"
       @submit="$refs.form.submit()"
     >
-      <template v-if="text">
-        <!-- eslint-disable-next-line vue/no-v-html -->
-        <k-text v-html="text" />
+      <template v-if="skipDialog">
+        <k-icon class="k-loader" type="loader" />
       </template>
       <k-form
-        v-if="hasFields"
+        v-else-if="hasFields"
         ref="form"
         :value="model"
         :fields="fields"
@@ -30,13 +29,27 @@ const PAGE_CREATE_DIALOG = {
     </k-dialog>
   `,
   props: {
+    options: {
+      type: Object,
+      default: {}
+    },
     templateData: {
       type: Object,
       default: {}
     }
   },
 
+  computed: {
+    skipDialog() {
+      return this.$props.options && this.$props.options.skip;
+    }
+  },
   methods: {
+    ready() {
+      if(this.skipDialog) {
+        this.submit();
+      }
+    },
     input() {
       if(this.oldTemplate !== this.value.template){
         var

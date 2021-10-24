@@ -38,19 +38,25 @@ class Plugin {
             if ($forcedTemplate == ''){
                 throw new Exception("Set 'forcedTemplate' in order to skip add dialog.");
             } else {
-                //TODO: Handle Skip dialog
-                /*$now = time();
-                $result = array(
-                    'skipDialog' => true,
-                    'page' => array(
-                        'template'  => $forcedTemplate,
-                        'slug' => $now,
-                        'content' => array (
+                $now = time();
+                return [
+                    'component' => 'k-page-create-dialog',
+                    'props' => [
+                        'options' => [
+                            'skip' => true
+                        ],
+                        'fields' => [],
+                        'submitButton' => false,
+                        'cancelButton' => false,
+                        'templateData' => [],
+                        'value' => [
+                            'parent'   => $id,
+                            'template' => $forcedTemplate,
                             'title' => $now,
-                        )
-                    )
-                );
-                return $result;*/
+                            'slug' => $now
+                        ]
+                    ]
+                ];
             }
         }
 
@@ -140,7 +146,6 @@ class Plugin {
                     'title' => "",
                     'slug' => ""
                 ]
-
             ]
         ];
     }
