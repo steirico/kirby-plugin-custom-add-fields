@@ -157,17 +157,17 @@ class Plugin {
         }
         */
 
+        $slug = $content['slug'];
+        $slug = $slug == '' ? time() : $slug;
+        $template = $content['template'];
+
         unset($content['slug']);
         unset($content['template']);
-
-        $slug = get('slug');
-        $slug = $slug == '' ? time() : $slug;
-
 
         $page = Find::parent(get('parent', 'site'))->createChild([
             'content'  => $content,
             'slug'     => $slug,
-            'template' => get('template'),
+            'template' => $template,
         ]);
 
         return [
