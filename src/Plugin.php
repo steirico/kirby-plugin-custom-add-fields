@@ -12,10 +12,28 @@ use Throwable;
 
 class Plugin {
     static public function loadPageCreate() {
-        $id = get('parent', 'site');
-        $object = Find::parent($id);
+        // taken from src/kirby/config/areas/site/dialogs.php
+        // the parent model for the new page
+        $parent = get('parent', 'site');
+
+        // the view on which the add button is located
+        // this is important to find the right section
+        // and provide the correct templates for the new page
+        $view = get('view', $parent);
+
+        // templates will be fetched depending on the
+        // section settings in the blueprint
         $section = get('section');
-        $templates = $object->blueprints($section);
+
+        // this is the parent instance
+        $object = Find::parent($parent);
+
+        // this is the view model
+        // i.e. site if the add button is on
+        // the dashboard
+        $view = Find::parent($view);
+        
+        $templates = $view->blueprints($section);
 
         $parentProps = Blueprint::load($object->blueprint()->name());
         $parentAddFields = A::get($parentProps, 'addFields', null);
@@ -50,7 +68,7 @@ class Plugin {
                         'cancelButton' => false,
                         'templateData' => [],
                         'value' => [
-                            'parent'   => $id,
+                            'parent'   => $parent,
                             'template' => $forcedTemplate,
                             'title' => $now,
                             'slug' => $now
@@ -120,9 +138,9 @@ class Plugin {
                 foreach($addFields as $name => $addField) {
                     // TODO POC Setting endpoints
                     $addFields[$name]['endpoints'] = [
-                        'field' =>  $id . "/addfields/" . $templateName . "/" . $name,
-                        'section' => $id . "/addsections/" . $templateName . "/" . $section,
-                        'model' => $id
+                        'field' =>  $parent . "/addfields/" . $templateName . "/" . $name,
+                        'section' => $parent . "/addsections/" . $templateName . "/" . $section,
+                        'model' => $parent
                     ];
 
                     if($name == 'slug') {
@@ -141,7 +159,7 @@ class Plugin {
                 'submitButton' => t('page.draft.create'),
                 'templateData' => $templateData,
                 'value' => [
-                    'parent'   => $id,
+                    'parent'   => $parent,
                     'template' => $firstTemplate,
                     'title' => "",
                     'slug' => ""
