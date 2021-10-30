@@ -330,9 +330,11 @@ const LEGACY_PAGE_CREATE_DIALOG = {
   }
 };
 
+const isLegacy = panel.$system ? false : true;
+
 panel.plugin("steirico/kirby-plugin-custom-add-fields", {
   components: {
-    'k-page-create-dialog': PAGE_CREATE_DIALOG
+    'k-page-create-dialog': isLegacy ? LEGACY_PAGE_CREATE_DIALOG : PAGE_CREATE_DIALOG
   },
   use: [
     function(Vue) {
@@ -342,7 +344,7 @@ panel.plugin("steirico/kirby-plugin-custom-add-fields", {
       Object.keys(VUE_COMPONENTS).forEach(componentName => {
         const COMPONENT = {
           components: {
-            'k-page-create-dialog': PAGE_CREATE_DIALOG
+            'k-page-create-dialog': isLegacy ? LEGACY_PAGE_CREATE_DIALOG : PAGE_CREATE_DIALOG
           },
           extends: VUE_COMPONENTS[componentName]
         };
