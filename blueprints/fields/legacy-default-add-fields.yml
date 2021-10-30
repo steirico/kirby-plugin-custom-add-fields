@@ -2,15 +2,13 @@
 type: group
 fields:
   title:
-    label: "title"
+    label: title
     type: text
     required: true
     icon: title
-    preselect: true
   slug:
     label: "slug"
-    type: slug
-    sync: title
+    type: text
     required: true
     counter: false
     icon: url
