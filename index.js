@@ -92,7 +92,6 @@ const PAGE_CREATE_DIALOG = {
     },
 
     submit() {
-      console.log("submit");
       if (this.isValid()){
         this.$parent.onSubmit(this.value);
       } else {
