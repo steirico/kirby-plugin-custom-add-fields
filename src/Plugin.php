@@ -5,6 +5,7 @@ namespace Steineri\CustomAddFields;
 use Kirby\Cms\Blueprint;
 use Kirby\Cms\Section;
 use Kirby\Cms\Find;
+use Kirby\Cms\Page;
 use Kirby\Exception\Exception;
 use Kirby\Toolkit\A;
 use Kirby\Panel\Field;
@@ -144,12 +145,14 @@ class Plugin {
                 $templateName = $template['name'];
                 
                 foreach($addFields as $name => $addField) {
-                    // TODO POC Setting endpoints
+                    // TODO: POC endpoints needed?
                     $addFields[$name]['endpoints'] = [
                         'field' =>  $parent . "/addfields/" . $templateName . "/" . $name,
                         'section' => $parent . "/addsections/" . $templateName . "/" . $section,
                         'model' => $parent
                     ];
+                    // TODO: POC section needed?
+                    $addFields[$name]['section'] = 'addfields';
 
                     if($name == 'slug') {
                         $addFields[$name]['path'] = empty($parentInstance->id()) === false ? '/' . $parentInstance->id() . '/' : '/';
