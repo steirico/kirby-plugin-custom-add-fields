@@ -80,9 +80,10 @@ const PAGE_CREATE_DIALOG = {
 
         Object.keys(fields).some(fieldName => {
           var
+            field = fields[fieldName],
             error = errors[fieldName];
-
-          invalid = error.$pending || error.$invalid || error.$error;
+            
+          invalid = field.length > 0 && (error.$pending || error.$invalid || error.$error);
           return invalid;
         });
         return !invalid;
@@ -221,12 +222,17 @@ const LEGACY_PAGE_CREATE_DIALOG = {
 
       if(form) {
         form.novalidate = false;
-        errors = form.$refs.fields.errors;
+        fieldset = form.$refs.fields
+        fields = fieldset.$refs
+        errors = fieldset.errors;
         invalid = true;
 
-        Object.keys(errors).some(field => {
-          var error = errors[field];
-          invalid = error.$pending || error.$invalid || error.$error;
+        Object.keys(fields).some(fieldName => {
+          var
+            field = fields[fieldName],
+            error = errors[fieldName];
+            
+          invalid = field.length > 0 && (error.$pending || error.$invalid || error.$error);
           return invalid;
         });
         return !invalid;
