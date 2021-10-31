@@ -51,12 +51,12 @@ const PAGE_CREATE_DIALOG = {
       }
     },
     input() {
-      if(this.oldTemplate !== this.value.template){
+      if(this.template !== this.value.template){
         var
           oTemplate = {},
           template = this.value.template;
 
-        this.oldTemplate  = template;
+        this.template  = template;
 
         oTemplate = this.$props.templateData[template];
         this.$props.fields = oTemplate;
