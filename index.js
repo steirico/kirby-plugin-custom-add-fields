@@ -229,7 +229,11 @@ const LEGACY_PAGE_CREATE_DIALOG = {
             this.options = this.templates[0].options;
           }
 
-          this.$refs.dialog.open();
+          if(props.options && props.options.skip){
+            this.submit();
+          } else {
+            this.$refs.dialog.open();
+          }
         })
         .catch(error => {
           this.$store.dispatch("notification/error", error);
