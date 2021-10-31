@@ -126,22 +126,27 @@ const LEGACY_PAGE_CREATE_DIALOG = {
   data() {
     return {
       notification: null,
-      parent: null,
-      section: null,
-      templates: [],
       template: '',
       page: {},
       addFields: {}
     };
   },
+  props: {
+    options: {
+      type: Object,
+      default: {}
+    },
+    templateData: {
+      type: Object,
+      default: {}
+    }
+  },
 
   computed: {
     fields() {
       var
-        fields = {},
-        field = {},
-        endpoint = this.$route.path,
-        section = 'addFields';
+        fields = this.addFields,
+        field = {};
 
 
 
@@ -178,26 +183,13 @@ const LEGACY_PAGE_CREATE_DIALOG = {
       this.$api
         .get(blueprintApi + '/addfields', {section: section})
         .then(response => {
-          if(response.skipDialog){
-            this.submit(response);
-            return;
-          }
-          this.forceTemplateSelection = response.forceTemplateSelection || false;
-          this.templates = response.templates.map(blueprint => {
-            return {
-              value: blueprint.name,
-              text: blueprint.title,
-              addFields: blueprint.addFields,
-              options: blueprint.options
-            };
-          });
+          var
+            props = response.props;
 
-          if (this.templates[0]) {
-            this.page.template = this.templates[0].value;
-            this.template = this.templates[0].value;
-            this.addFields = this.templates[0].addFields;
-            this.options = this.templates[0].options;
-          }
+          this.templateData = props.templateData;
+          this.template = props.value.template;
+          this.addFields = props.fields;
+          this.page = props.value;
 
           if(props.options && props.options.skip){
             this.submit();
@@ -213,16 +205,10 @@ const LEGACY_PAGE_CREATE_DIALOG = {
     input() {
       if(this.page.template !== this.template){
         var
-          oTemplate = {},
           template = this.page.template;
 
         this.template  = template;
-
-        oTemplate = this.templates.find(function(tpl){
-          return tpl.value === template;
-        });
-        this.addFields = oTemplate.addFields;
-        this.options = oTemplate.options;
+        this.addFields = this.templateData[template];
         this.$set(this.page, "template", template);
       }
     },
