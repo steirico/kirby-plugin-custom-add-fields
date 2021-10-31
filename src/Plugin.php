@@ -181,12 +181,14 @@ class Plugin {
         $slug = $content['slug'];
         $slug = $slug == '' ? time() : $slug;
         $template = $content['template'];
+        $parent = $content['parent'];
 
         unset($content['slug']);
         unset($content['template']);
+        unset($content['parent']);
 
         // Add Page
-        $parent = Find::parent(get('parent', 'site'));
+        $parent = Plugin::parent($parent);
         $page = $parent->createChild([
             'content'  => $content,
             'slug'     => $slug,
