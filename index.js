@@ -213,7 +213,7 @@ const LEGACY_PAGE_CREATE_DIALOG = {
       this.section = section;
 
       this.$api
-        .get(blueprintApi + '/add-fields', {section: section})
+        .get(blueprintApi + '/addfields', {section: section})
         .then(response => {
           if(response.skipDialog){
             this.submit(response);
@@ -302,7 +302,7 @@ const LEGACY_PAGE_CREATE_DIALOG = {
         delete data.content.slug;
 
         this.$api
-          .post(this.parent + "/children", data)
+          .post(this.parent + "/children/addfields", data)
           .then(page => {
             if(this.options && this.options.redirectToNewPage) {
               if(this.options.redirectToNewPage === true) {
