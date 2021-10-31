@@ -194,13 +194,6 @@ const LEGACY_PAGE_CREATE_DIALOG = {
             this.$set(this.page, name, "");
           }
         }
-
-        field.section = section;
-        field.endpoints = {
-          field: endpoint + "/addfields/" + this.template + "/" + name,
-          section: endpoint + "/addsections/" + this.template + "/" + section,
-          model: endpoint
-        };
       });
 
       return fields;
