@@ -282,43 +282,21 @@ const LEGACY_PAGE_CREATE_DIALOG = {
       }
     },
 
-    submit(pageData) {
+    submit() {
       if (this.isValid()){
-        var data = {};
-        var route = '';
-
-        if(pageData.skipDialog){
-          data = pageData.page;
-        } else {
-          data = {
-            template: this.page.template,
-            slug: this.page.slug || Date.now(),
-            content: Object.assign({}, this.page)
-          };
-        }
-
-        delete data.content.addFields;
-        delete data.content.template;
-        delete data.content.slug;
-
         this.$api
-          .post(this.parent + "/children/addfields", data)
-          .then(page => {
-            if(this.options && this.options.redirectToNewPage) {
-              if(this.options.redirectToNewPage === true) {
-                route = this.$api.pages.link(page.id);
-              } else if (this.options.redirectToNewPage !== false) {
-                route = this.$api.pages.link(this.options.redirectToNewPage);
-              }
-            } else {
-              route = page.parent ? this.$api.pages.link(page.parent.id) : '/';
-            }
+          .post(this.parent + "/children/addfields", this.page)
+          .then(response => {
 
             this.success({
-              route: route,
+              route: response.redirect,
               message: ":)",
-              event: "page.create"
+              event: response.event
             });
+
+            if(response.redirect === ("/" + this.parent)){
+              this.$router.go();
+            }
           })
           .catch(error => {
             this.$refs.dialog.error(error.message);

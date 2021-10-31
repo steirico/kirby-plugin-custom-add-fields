@@ -199,23 +199,21 @@ class Plugin {
         ]);
 
         // Evaluate redirect
-        $props = $page->blueprint()->toArray();
-        $addFields = A::get($props, 'addFields', null);
-        $dialogProperties = A::get($addFields, '__dialog', null);
-        $redirectTarget = $parent->panel()->url(true);
-        if($dialogProperties) {
-            $redirectConfig = A::get($addFields['__dialog'], 'redirect', false);
-            if(is_string($redirectConfig)){
-                $redirectTarget = kirby()->page($redirectConfig)->panel()->url(true);
-            } else if($redirectConfig == true){
-                $redirectTarget = $page->panel()->url(true);
-            }
-        }
+        $redirectTarget = Plugin::getRedirectTarget($parent, $page);
 
         return [
             'event'    => 'page.create',
             'redirect' => $redirectTarget
         ];
+    }
+
+    private static function parent($parent) {
+        if (class_exists("Kirby\Cms\Find")) {
+            $parent == '' ? 'site' : $parent;
+            return Find::parent($parent);
+        } else {
+            return $parent == '' ? site() : page($parent);
+        }
     }
 
     private static function hiddenField(): array {
@@ -250,6 +248,35 @@ class Plugin {
                 'required' => true
             );
         }
+    }
+
+    private static function getRedirectTarget($parent, $page): string {
+        if (Plugin::isLegacy()) {
+            $panelURL = function($page): string {
+                $id = $page->id();
+                $url = $id == null ? "/site" : "/pages/" . str_replace("/", "+", $id);
+                return $url;
+            };
+        } else {
+            $panelURL = function($page): string {
+                return $page->panel()->url(true);
+            };
+        }
+
+        $props = $page->blueprint()->toArray();
+        $addFields = A::get($props, 'addFields', null);
+        $dialogProperties = A::get($addFields, '__dialog', null);
+        $redirectTarget = $panelURL($parent);
+        if($dialogProperties) {
+            $redirectConfig = A::get($addFields['__dialog'], 'redirect', false);
+            if(is_string($redirectConfig)){
+                $redirectTarget = $panelURL(kirby()->page($redirectConfig));
+            } else if($redirectConfig == true){
+                $redirectTarget = $panelURL($page);
+            }
+        }
+
+        return $redirectTarget;
     }
 
     private static function getVersion(): string {
