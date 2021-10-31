@@ -143,42 +143,12 @@ const LEGACY_PAGE_CREATE_DIALOG = {
         endpoint = this.$route.path,
         section = 'addFields';
 
-      if(this.addFields) {
-        fields = this.addFields;
-      } else {
-        fields = {
-          title: {
-            label: this.$t("title"),
-            type: "text",
-            required: true,
-            icon: "title"
-          },
-          slug: {
-            label: this.$t("slug"),
-            type: "text",
-            required: true,
-            counter: false,
-            icon: "url"
-          }
-        }
-      }
 
-      if (this.templates.length > 1 || this.forceTemplateSelection || config.debug) {
-        fields.template = {
-          name: "template",
-          label: this.$t("template"),
-          type: "select",
-          disabled: this.templates.length === 1,
-          required: true,
-          icon: "code",
-          empty: false,
-          options: this.templates
-        }
-      }
 
       Object.keys(fields).forEach(name => {
         field = fields[name];
 
+        // Ensure defaults
         if (name != "title" && name != "template" && this.page[name] === undefined){
           if (field.default !== null && field.default !== undefined) {
             this.$set(this.page, name, this.$helper.clone(field.default));
