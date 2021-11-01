@@ -1,7 +1,57 @@
-const config = window.panel;
+const isLegacy = panel.$system ? false : true;
+
+const PAGE_CREATE_COMMON = {
+  methods: {
+    input() {
+      var
+        data = isLegacy ? this.page : this.value,
+        template = data.template;
+
+      if(template !== this.template){
+        this.template  = template;
+        if(isLegacy) {  
+          this.addFields = this.templateData[template];
+          this.$set(this.page, "template", template);
+        } else {
+          this.$props.fields = this.$props.templateData[template];
+        }
+      }
+    },
+
+    isValid() {
+      var
+        form = this.$refs.form,
+        fieldset = {},
+        fields = {},
+        errors = {},
+        invalid = false;
+
+      if(form) {
+        form.novalidate = false;
+        fieldset = form.$refs.fields
+        fields = fieldset.$refs
+        errors = fieldset.errors;
+        invalid = true;
+
+        Object.keys(fields).some(fieldName => {
+          var
+            field = fields[fieldName],
+            error = errors[fieldName];
+            
+          invalid = field.length > 0 && (error.$pending || error.$invalid || error.$error);
+          return invalid;
+        });
+        return !invalid;
+      } else {
+        return !invalid;
+      }
+    }
+  }
+};
 
 const PAGE_CREATE_DIALOG = {
   extends: 'k-form-dialog',
+  mixin: [PAGE_CREATE_COMMON],
   template: `
     <k-dialog
       ref="dialog"
@@ -50,47 +100,6 @@ const PAGE_CREATE_DIALOG = {
         this.submit();
       }
     },
-    input() {
-      if(this.template !== this.value.template){
-        var
-          oTemplate = {},
-          template = this.value.template;
-
-        this.template  = template;
-
-        oTemplate = this.$props.templateData[template];
-        this.$props.fields = oTemplate;
-      }
-    },
-
-    isValid() {
-      var
-        form = this.$refs.form,
-        fieldset = {},
-        fields = {},
-        errors = {},
-        invalid = false;
-
-      if(form) {
-        form.novalidate = false;
-        fieldset = form.$refs.fields
-        fields = fieldset.$refs
-        errors = fieldset.errors;
-        invalid = true;
-
-        Object.keys(fields).some(fieldName => {
-          var
-            field = fields[fieldName],
-            error = errors[fieldName];
-            
-          invalid = field.length > 0 && (error.$pending || error.$invalid || error.$error);
-          return invalid;
-        });
-        return !invalid;
-      } else {
-        return !invalid;
-      }
-    },
 
     submit() {
       if (this.isValid()){
@@ -104,6 +113,7 @@ const PAGE_CREATE_DIALOG = {
 
 const LEGACY_PAGE_CREATE_DIALOG = {
   extends: 'k-page-create-dialog',
+  mixin: [PAGE_CREATE_COMMON],
   template: `
     <k-dialog
       ref="dialog"
@@ -148,8 +158,6 @@ const LEGACY_PAGE_CREATE_DIALOG = {
       var
         fields = this.addFields,
         field = {};
-
-
 
       Object.keys(fields).forEach(name => {
         field = fields[name];
@@ -203,44 +211,6 @@ const LEGACY_PAGE_CREATE_DIALOG = {
         });
     },
 
-    input() {
-      if(this.page.template !== this.template){
-        var
-          template = this.page.template;
-
-        this.template  = template;
-        this.addFields = this.templateData[template];
-        this.$set(this.page, "template", template);
-      }
-    },
-
-    isValid() {
-      var
-        form = this.$refs.form,
-        errors = {},
-        invalid = false;
-
-      if(form) {
-        form.novalidate = false;
-        fieldset = form.$refs.fields
-        fields = fieldset.$refs
-        errors = fieldset.errors;
-        invalid = true;
-
-        Object.keys(fields).some(fieldName => {
-          var
-            field = fields[fieldName],
-            error = errors[fieldName];
-            
-          invalid = field.length > 0 && (error.$pending || error.$invalid || error.$error);
-          return invalid;
-        });
-        return !invalid;
-      } else {
-        return !invalid;
-      }
-    },
-
     submit() {
       if (this.isValid()){
         this.$api
@@ -267,8 +237,6 @@ const LEGACY_PAGE_CREATE_DIALOG = {
   }
 };
 
-const isLegacy = panel.$system ? false : true;
-
 panel.plugin("steirico/kirby-plugin-custom-add-fields", {
   components: {
     'k-page-create-dialog': isLegacy ? LEGACY_PAGE_CREATE_DIALOG : PAGE_CREATE_DIALOG
@@ -277,6 +245,8 @@ panel.plugin("steirico/kirby-plugin-custom-add-fields", {
     function(Vue) {
       const
         VUE_COMPONENTS = Vue.options.components;
+
+      Vue.mixin(PAGE_CREATE_COMMON);
 
       Object.keys(VUE_COMPONENTS).forEach(componentName => {
         const COMPONENT = {
