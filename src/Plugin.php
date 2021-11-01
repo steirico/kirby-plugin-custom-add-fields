@@ -213,7 +213,7 @@ class Plugin {
         } else {
             $parent == '' ? 'site' : $parent;
             $parent = str_replace("+", "/", basename($parent));
-            return $parent == 'site' ? site() : page($parent);
+            return $parent == 'site' ? site() : kirby()->page($parent);
         }
     }
 
