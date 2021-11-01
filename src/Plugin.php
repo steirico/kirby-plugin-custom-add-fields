@@ -97,7 +97,7 @@ class Plugin {
 
         $templateSelectField = [];
         if ($forceTemplateSelection || count($templates) > 1 || option('debug') === true) {
-            $templateSelectField = Plugin::templateField($templates);
+            $templateSelectField = Plugin::templateField($templates, $hasForcedTemplate);
         } else {
             $templateSelectField = Plugin::hiddenField();
         }
@@ -224,7 +224,7 @@ class Plugin {
         }
     }
 
-    private static function templateField($templates): array {
+    private static function templateField($templates, $hasForcedTemplate): array {
         if (class_exists("Kirby\Panel\Field")) {
             return Field::template($templates, [
                 'required' => true
@@ -244,7 +244,7 @@ class Plugin {
                 'empty'    => false,
                 'options'  => $options,
                 'icon'     => 'template',
-                'disabled' => count($options) <= 1,
+                'disabled' => count($options) <= 1 || $hasForcedTemplate,
                 'required' => true
             );
         }
