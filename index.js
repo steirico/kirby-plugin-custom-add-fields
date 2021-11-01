@@ -38,7 +38,7 @@ const PAGE_CREATE_COMMON = {
             field = fields[fieldName],
             error = errors[fieldName];
             
-          invalid = field.length > 0 && (error.$pending || error.$invalid || error.$error);
+          invalid = field.length > 0 && error && (error.$pending || error.$invalid || error.$error);
           return invalid;
         });
         return !invalid;
