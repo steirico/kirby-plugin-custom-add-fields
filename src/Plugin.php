@@ -38,9 +38,9 @@ class Plugin {
     }
 
     static public function loadLegacyPageCreate($parent) {
+        $parent = $parent == '' ? 'site' : '/' . $parent;
         $section = get('section');
-        $parent   = str_replace('+', '/', $parent);
-        $parentInstance = $parent == '' ? site() : page($parent);
+        $parentInstance = Plugin::parent($parent);
         return Plugin::loadGenericPageCreate($parent, $parentInstance, $parentInstance, $section);
     }
 
@@ -145,7 +145,6 @@ class Plugin {
                 $templateName = $template['name'];
                 
                 foreach($addFields as $name => $addField) {
-                    // TODO: POC endpoints needed?
                     $addFields[$name]['endpoints'] = [
                         'field' =>  $parent . "/addfields/" . $templateName . "/" . $name,
                         'section' => $parent . "/addsections/" . $templateName . "/" . $section,
@@ -212,7 +211,9 @@ class Plugin {
             $parent == '' ? 'site' : $parent;
             return Find::parent($parent);
         } else {
-            return $parent == '' ? site() : page($parent);
+            $parent == '' ? 'site' : $parent;
+            $parent = str_replace("+", "/", basename($parent));
+            return $parent == 'site' ? site() : page($parent);
         }
     }
 
@@ -253,9 +254,7 @@ class Plugin {
     private static function getRedirectTarget($parent, $page): string {
         if (Plugin::isLegacy()) {
             $panelURL = function($page): string {
-                $id = $page->id();
-                $url = $id == null ? "/site" : "/pages/" . str_replace("/", "+", $id);
-                return $url;
+                return '/' . $page->panelPath();
             };
         } else {
             $panelURL = function($page): string {

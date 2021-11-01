@@ -36,8 +36,8 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
                 'pattern' => [
                     'site/children/blueprints/addfields',
                     'site/blueprints/addfields',
-                    'pages/(:any)/children/blueprints/addfields',
-                    'pages/(:any)/blueprints/addfields',
+                    '(:all)/children/blueprints/addfields',
+                    '(:all)/blueprints/addfields',
                 ],
                 'method' => 'GET',
                 'filter' => 'auth',
