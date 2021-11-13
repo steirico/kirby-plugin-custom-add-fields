@@ -8,6 +8,7 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
     ],
     'blueprints' => [
         'fields/default-add-fields' => __DIR__ . '/blueprints/fields/default-add-fields.yml',
+        'fields/legacy-default-add-fields' => __DIR__ . '/blueprints/fields/legacy-default-add-fields.yml'
     ],
 
     'areas' => [
@@ -31,6 +32,29 @@ Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
 
     'api' => [
         'routes' => [
+            [
+                'pattern' => [
+                    'site/children/blueprints/addfields',
+                    'site/blueprints/addfields',
+                    '(:all)/children/blueprints/addfields',
+                    '(:all)/blueprints/addfields',
+                ],
+                'method' => 'GET',
+                'filter' => 'auth',
+                'action'  => function (string $parent = '') {
+                    return Plugin::loadLegacyPageCreate($parent);
+                }
+            ],
+            [
+                'pattern' => [
+                    'site/children/addfields',
+                    'pages/(:any)/children/addfields',
+                ],
+                'method'  => 'POST',
+                'action'  => function () {
+                    return Plugin::submitPageCreate($this->requestBody());
+                }
+            ],
             [
                 'pattern' => 'pages/(:any)/addsections/(:any)',
                 'method'  => 'GET',

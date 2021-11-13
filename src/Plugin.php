@@ -5,6 +5,7 @@ namespace Steineri\CustomAddFields;
 use Kirby\Cms\Blueprint;
 use Kirby\Cms\Section;
 use Kirby\Cms\Find;
+use Kirby\Cms\Page;
 use Kirby\Exception\Exception;
 use Kirby\Toolkit\A;
 use Kirby\Panel\Field;
@@ -26,16 +27,27 @@ class Plugin {
         $section = get('section');
 
         // this is the parent instance
-        $object = Find::parent($parent);
+        $parentInstance = Find::parent($parent);
 
         // this is the view model
         // i.e. site if the add button is on
         // the dashboard
         $view = Find::parent($view);
-        
+
+        return Plugin::loadGenericPageCreate($parent, $parentInstance, $view, $section);
+    }
+
+    static public function loadLegacyPageCreate($parent) {
+        $parent = $parent == '' ? 'site' : '/' . $parent;
+        $section = get('section');
+        $parentInstance = Plugin::parent($parent);
+        return Plugin::loadGenericPageCreate($parent, $parentInstance, $parentInstance, $section);
+    }
+
+    static private function loadGenericPageCreate($parent, $parentInstance, $view, $section) {
         $templates = $view->blueprints($section);
 
-        $parentProps = Blueprint::load($object->blueprint()->name());
+        $parentProps = Blueprint::load($parentInstance->blueprint()->name());
         $parentAddFields = A::get($parentProps, 'addFields', null);
 
         $dialogProperties = A::get($parentAddFields, '__dialog', null);
@@ -43,11 +55,11 @@ class Plugin {
 
         $forcedTemplateFieldName = option('steirico.kirby-plugin-custom-add-fields.forcedTemplate.fieldName');
         $forcedTemplateFieldName = $forcedTemplateFieldName ? $forcedTemplateFieldName : '';
-        $hasForcedTemplate = $object->content()->has($forcedTemplateFieldName);
+        $hasForcedTemplate = $parentInstance->content()->has($forcedTemplateFieldName);
         $forcedTemplate = '';
 
         if($hasForcedTemplate){
-            $forcedTemplate = $object->{$forcedTemplateFieldName}()->value();
+            $forcedTemplate = $parentInstance->{$forcedTemplateFieldName}()->value();
         }
 
         $forcedTemplate = $forcedTemplate != '' ? $forcedTemplate : A::get($dialogProperties, 'forcedTemplate', '');
@@ -80,17 +92,14 @@ class Plugin {
 
         $forceTemplateSelection = option('steirico.kirby-plugin-custom-add-fields.forceTemplateSelectionField');
         if(!is_bool($forceTemplateSelection)) {
-            $version = preg_replace('/.*(\d+\.\d+\.\d+).*/m', '$1', kirby()->version());
-            $forceTemplateSelection = version_compare($version, '3.5.0', '<');
+            $forceTemplateSelection = Plugin::hideSingleTemplate();
         }
 
         $templateSelectField = [];
         if ($forceTemplateSelection || count($templates) > 1 || option('debug') === true) {
-            $templateSelectField = Field::template($templates, [
-                'required' => true
-            ]);
+            $templateSelectField = Plugin::templateField($templates, $hasForcedTemplate);
         } else {
-            $templateSelectField = Field::hidden();
+            $templateSelectField = Plugin::hiddenField();
         }
 
         $templateData = array();
@@ -106,7 +115,7 @@ class Plugin {
                 unset($addFields['__dialog']);
 
                 if(empty($addFields)) {
-                    $addFields = Blueprint::load("fields/default-add-fields");
+                    $addFields = Plugin::isLegacy() ? Blueprint::load("fields/legacy-default-add-fields") : Blueprint::load("fields/default-add-fields");
                     $addFields = A::get($addFields, 'fields', null);
                 }
 
@@ -117,7 +126,7 @@ class Plugin {
                     $fieldProps["kirby-plugin-custom-add-fields-title"] = $title;
                 }
                 $attr = [
-                    'model' => $object,
+                    'model' => $parentInstance,
                     'fields' => $fieldProps
                 ];
                 $addSection = new Section('fields', $attr);
@@ -131,20 +140,21 @@ class Plugin {
 
                 $addFields = array_replace($fieldOrder, $addFields);
                 $addFields['template'] = $templateSelectField;
-                $addFields['parent'] = Field::hidden();
+                $addFields['parent'] = Plugin::hiddenField();
 
                 $templateName = $template['name'];
                 
                 foreach($addFields as $name => $addField) {
-                    // TODO POC Setting endpoints
                     $addFields[$name]['endpoints'] = [
                         'field' =>  $parent . "/addfields/" . $templateName . "/" . $name,
                         'section' => $parent . "/addsections/" . $templateName . "/" . $section,
                         'model' => $parent
                     ];
+                    // TODO: POC section needed?
+                    $addFields[$name]['section'] = 'addfields';
 
                     if($name == 'slug') {
-                        $addFields[$name]['path'] = empty($object->id()) === false ? '/' . $object->id() . '/' : '/';
+                        $addFields[$name]['path'] = empty($parentInstance->id()) === false ? '/' . $parentInstance->id() . '/' : '/';
                     }
                 }
 
@@ -173,12 +183,14 @@ class Plugin {
         $slug = $content['slug'];
         $slug = $slug == '' ? time() : $slug;
         $template = $content['template'];
+        $parent = $content['parent'];
 
         unset($content['slug']);
         unset($content['template']);
+        unset($content['parent']);
 
         // Add Page
-        $parent = Find::parent(get('parent', 'site'));
+        $parent = Plugin::parent($parent);
         $page = $parent->createChild([
             'content'  => $content,
             'slug'     => $slug,
@@ -186,22 +198,97 @@ class Plugin {
         ]);
 
         // Evaluate redirect
-        $props = $page->blueprint()->toArray();
-        $addFields = A::get($props, 'addFields', null);
-        $dialogProperties = A::get($addFields, '__dialog', null);
-        $redirectTarget = $parent->panel()->url(true);
-        if($dialogProperties) {
-            $redirectConfig = A::get($addFields['__dialog'], 'redirect', false);
-            if(is_string($redirectConfig)){
-                $redirectTarget = kirby()->page($redirectConfig)->panel()->url(true);
-            } else if($redirectConfig == true){
-                $redirectTarget = $page->panel()->url(true);
-            }
-        }
+        $redirectTarget = Plugin::getRedirectTarget($parent, $page);
 
         return [
             'event'    => 'page.create',
             'redirect' => $redirectTarget
         ];
+    }
+
+    private static function parent($parent) {
+        if (class_exists("Kirby\Cms\Find")) {
+            $parent == '' ? 'site' : $parent;
+            return Find::parent($parent);
+        } else {
+            $parent == '' ? 'site' : $parent;
+            $parent = str_replace("+", "/", basename($parent));
+            return $parent == 'site' ? site() : kirby()->page($parent);
+        }
+    }
+
+    private static function hiddenField(): array {
+        if (class_exists("Kirby\Panel\Field")) {
+            return Field::hidden();
+        } else {
+            return ['type' => 'hidden'];
+        }
+    }
+
+    private static function templateField($templates, $hasForcedTemplate): array {
+        if (class_exists("Kirby\Panel\Field")) {
+            return Field::template($templates, [
+                'required' => true
+            ]);
+        } else {
+            $options = [];
+            foreach ($templates as $template) {
+                $options[] = [
+                    'text'  => $template['title'] ?? $template['text']  ?? null,
+                    'value' => $template['name']  ?? $template['value'] ?? null,
+                ];
+            }
+
+            return array(
+                'label'    => t('template'),
+                'type'     => 'select',
+                'empty'    => false,
+                'options'  => $options,
+                'icon'     => 'template',
+                'disabled' => count($options) <= 1 || $hasForcedTemplate,
+                'required' => true
+            );
+        }
+    }
+
+    private static function getRedirectTarget($parent, $page): string {
+        if (Plugin::isLegacy()) {
+            $panelURL = function($page): string {
+                return '/' . $page->panelPath();
+            };
+        } else {
+            $panelURL = function($page): string {
+                return $page->panel()->url(true);
+            };
+        }
+
+        $props = $page->blueprint()->toArray();
+        $addFields = A::get($props, 'addFields', null);
+        $dialogProperties = A::get($addFields, '__dialog', null);
+        $redirectTarget = $panelURL($parent);
+        if($dialogProperties) {
+            $redirectConfig = A::get($addFields['__dialog'], 'redirect', false);
+            if(is_string($redirectConfig)){
+                $redirectTarget = $panelURL(kirby()->page($redirectConfig));
+            } else if($redirectConfig == true){
+                $redirectTarget = $panelURL($page);
+            }
+        }
+
+        return $redirectTarget;
+    }
+
+    private static function getVersion(): string {
+        return preg_replace('/^\D*(\d+\.\d+\.\d+\.?\d?).*/m', '$1', kirby()->version());
+    }
+
+    private static function isLegacy(): bool {
+        $version = Plugin::getVersion();
+        return version_compare($version, '3.6.0', '<');
+    }
+
+    private static function hideSingleTemplate(): bool {
+        $version = Plugin::getVersion();
+        return version_compare($version, '3.5.0', '>=');
     }
 }
