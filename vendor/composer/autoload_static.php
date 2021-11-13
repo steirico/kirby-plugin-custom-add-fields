@@ -11,6 +11,10 @@ class ComposerStaticInit98b27033413c2529b3e6c831cfefa4f9
     );
 
     public static $prefixLengthsPsr4 = array (
+        'S' => 
+        array (
+            'Steineri\\CustomAddFields\\' => 25,
+        ),
         'K' => 
         array (
             'Kirby\\' => 6,
@@ -18,6 +22,10 @@ class ComposerStaticInit98b27033413c2529b3e6c831cfefa4f9
     );
 
     public static $prefixDirsPsr4 = array (
+        'Steineri\\CustomAddFields\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/src',
+        ),
         'Kirby\\' => 
         array (
             0 => __DIR__ . '/..' . '/getkirby/composer-installer/src',
@@ -25,10 +33,12 @@ class ComposerStaticInit98b27033413c2529b3e6c831cfefa4f9
     );
 
     public static $classMap = array (
+        'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'Kirby\\ComposerInstaller\\CmsInstaller' => __DIR__ . '/..' . '/getkirby/composer-installer/src/ComposerInstaller/CmsInstaller.php',
         'Kirby\\ComposerInstaller\\Installer' => __DIR__ . '/..' . '/getkirby/composer-installer/src/ComposerInstaller/Installer.php',
         'Kirby\\ComposerInstaller\\Plugin' => __DIR__ . '/..' . '/getkirby/composer-installer/src/ComposerInstaller/Plugin.php',
         'Kirby\\ComposerInstaller\\PluginInstaller' => __DIR__ . '/..' . '/getkirby/composer-installer/src/ComposerInstaller/PluginInstaller.php',
+        'Steineri\\CustomAddFields\\Plugin' => __DIR__ . '/../..' . '/src/Plugin.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

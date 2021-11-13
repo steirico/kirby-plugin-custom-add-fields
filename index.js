@@ -1,7 +1,119 @@
-const config = window.panel;
+const isLegacy = panel.$system ? false : true;
+
+const PAGE_CREATE_COMMON = {
+  methods: {
+    input() {
+      var
+        data = isLegacy ? this.page : this.value,
+        template = data.template;
+
+      if(template !== this.template){
+        this.template  = template;
+        if(isLegacy) {  
+          this.addFields = this.templateData[template];
+          this.$set(this.page, "template", template);
+        } else {
+          this.$props.fields = this.$props.templateData[template];
+        }
+      }
+    },
+
+    isValid() {
+      var
+        form = this.$refs.form,
+        fieldset = {},
+        fields = {},
+        errors = {},
+        invalid = false;
+
+      if(form) {
+        form.novalidate = false;
+        fieldset = form.$refs.fields
+        fields = fieldset.$refs
+        errors = fieldset.errors;
+        invalid = true;
+
+        Object.keys(fields).some(fieldName => {
+          var
+            field = fields[fieldName],
+            error = errors[fieldName];
+            
+          invalid = field.length > 0 && error && (error.$pending || error.$invalid || error.$error);
+          return invalid;
+        });
+        return !invalid;
+      } else {
+        return !invalid;
+      }
+    }
+  }
+};
 
 const PAGE_CREATE_DIALOG = {
+  extends: 'k-form-dialog',
+  mixin: [PAGE_CREATE_COMMON],
+  template: `
+    <k-dialog
+      ref="dialog"
+      v-bind="$props"
+      @cancel="$emit('cancel')"
+      @close="$emit('close')"
+      @ready="ready"
+      @submit="$refs.form.submit()"
+    >
+      <template v-if="skipDialog">
+        <k-icon class="k-loader" type="loader" />
+      </template>
+      <k-form
+        v-else-if="hasFields"
+        ref="form"
+        :value="model"
+        :fields="fields"
+        :novalidate="true"
+        @submit="submit"
+        @input="input"
+      />
+      <k-box v-else theme="negative">
+        This form dialog has no fields
+      </k-box>
+    </k-dialog>
+  `,
+  props: {
+    options: {
+      type: Object,
+      default: {}
+    },
+    templateData: {
+      type: Object,
+      default: {}
+    }
+  },
+
+  computed: {
+    skipDialog() {
+      return this.$props.options && this.$props.options.skip;
+    }
+  },
+  methods: {
+    ready() {
+      if(this.skipDialog) {
+        this.submit();
+      }
+    },
+
+    submit() {
+      if (this.isValid()){
+        this.$parent.onSubmit(this.value);
+      } else {
+        this.$refs.dialog.error(this.$t("error.form.incomplete"));
+      }
+    }
+  }
+};
+
+const LEGACY_PAGE_CREATE_DIALOG = {
   extends: 'k-page-create-dialog',
+  mixin: [PAGE_CREATE_COMMON],
   template: `
     <k-dialog
       ref="dialog"
@@ -25,59 +137,32 @@ const PAGE_CREATE_DIALOG = {
   data() {
     return {
       notification: null,
-      parent: null,
-      section: null,
-      templates: [],
       template: '',
       page: {},
       addFields: {}
     };
   },
+  props: {
+    options: {
+      type: Object,
+      default: {}
+    },
+    templateData: {
+      type: Object,
+      default: {}
+    }
+  },
 
   computed: {
     fields() {
       var
-        fields = {},
-        field = {},
-        endpoint = this.$route.path,
-        section = 'addFields';
-
-      if(this.addFields) {
-        fields = this.addFields;
-      } else {
-        fields = {
-          title: {
-            label: this.$t("title"),
-            type: "text",
-            required: true,
-            icon: "title"
-          },
-          slug: {
-            label: this.$t("slug"),
-            type: "text",
-            required: true,
-            counter: false,
-            icon: "url"
-          }
-        }
-      }
-
-      if (this.templates.length > 1 || this.forceTemplateSelection || config.debug) {
-        fields.template = {
-          name: "template",
-          label: this.$t("template"),
-          type: "select",
-          disabled: this.templates.length === 1,
-          required: true,
-          icon: "code",
-          empty: false,
-          options: this.templates
-        }
-      }
+        fields = this.addFields,
+        field = {};
 
       Object.keys(fields).forEach(name => {
         field = fields[name];
 
+        // Ensure defaults
         if (name != "title" && name != "template" && this.page[name] === undefined){
           if (field.default !== null && field.default !== undefined) {
             this.$set(this.page, name, this.$helper.clone(field.default));
@@ -93,13 +178,6 @@ const PAGE_CREATE_DIALOG = {
             this.$set(this.page, name, "");
           }
         }
-
-        field.section = section;
-        field.endpoints = {
-          field: endpoint + "/addfields/" + this.template + "/" + name,
-          section: endpoint + "/addsections/" + this.template + "/" + section,
-          model: endpoint
-        };
       });
 
       return fields;
@@ -112,112 +190,42 @@ const PAGE_CREATE_DIALOG = {
       this.section = section;
 
       this.$api
-        .get(blueprintApi + '/add-fields', {section: section})
+        .get(blueprintApi + '/addfields', {section: section})
         .then(response => {
-          if(response.skipDialog){
-            this.submit(response);
-            return;
-          }
-          this.forceTemplateSelection = response.forceTemplateSelection || false;
-          this.templates = response.templates.map(blueprint => {
-            return {
-              value: blueprint.name,
-              text: blueprint.title,
-              addFields: blueprint.addFields,
-              options: blueprint.options
-            };
-          });
+          var
+            props = response.props;
 
-          if (this.templates[0]) {
-            this.page.template = this.templates[0].value;
-            this.template = this.templates[0].value;
-            this.addFields = this.templates[0].addFields;
-            this.options = this.templates[0].options;
-          }
+          this.templateData = props.templateData;
+          this.template = props.value.template;
+          this.addFields = props.fields;
+          this.page = props.value;
 
-          this.$refs.dialog.open();
+          if(props.options && props.options.skip){
+            this.submit();
+          } else {
+            this.$refs.dialog.open();
+          }
         })
         .catch(error => {
           this.$store.dispatch("notification/error", error);
         });
     },
 
-    input() {
-      if(this.page.template !== this.template){
-        var
-          oTemplate = {},
-          template = this.page.template;
-
-        this.template  = template;
-
-        oTemplate = this.templates.find(function(tpl){
-          return tpl.value === template;
-        });
-        this.addFields = oTemplate.addFields;
-        this.options = oTemplate.options;
-        this.$set(this.page, "template", template);
-      }
-    },
-
-    isValid() {
-      var
-        form = this.$refs.form,
-        errors = {},
-        invalid = false;
-
-      if(form) {
-        form.novalidate = false;
-        errors = form.$refs.fields.errors;
-        invalid = true;
-
-        Object.keys(errors).some(field => {
-          var error = errors[field];
-          invalid = error.$pending || error.$invalid || error.$error;
-          return invalid;
-        });
-        return !invalid;
-      } else {
-        return !invalid;
-      }
-    },
-
-    submit(pageData) {
+    submit() {
       if (this.isValid()){
-        var data = {};
-        var route = '';
-
-        if(pageData.skipDialog){
-          data = pageData.page;
-        } else {
-          data = {
-            template: this.page.template,
-            slug: this.page.slug || Date.now(),
-            content: Object.assign({}, this.page)
-          };
-        }
-
-        delete data.content.addFields;
-        delete data.content.template;
-        delete data.content.slug;
-
         this.$api
-          .post(this.parent + "/children", data)
-          .then(page => {
-            if(this.options && this.options.redirectToNewPage) {
-              if(this.options.redirectToNewPage === true) {
-                route = this.$api.pages.link(page.id);
-              } else if (this.options.redirectToNewPage !== false) {
-                route = this.$api.pages.link(this.options.redirectToNewPage);
-              }
-            } else {
-              route = page.parent ? this.$api.pages.link(page.parent.id) : '/';
-            }
+          .post(this.parent + "/children/addfields", this.page)
+          .then(response => {
 
             this.success({
-              route: route,
+              route: response.redirect,
               message: ":)",
-              event: "page.create"
+              event: response.event
             });
+
+            if(response.redirect === ("/" + this.parent)){
+              this.$router.go();
+            }
           })
           .catch(error => {
             this.$refs.dialog.error(error.message);
@@ -231,17 +239,19 @@ const PAGE_CREATE_DIALOG = {
 
 panel.plugin("steirico/kirby-plugin-custom-add-fields", {
   components: {
-    'k-page-create-dialog': PAGE_CREATE_DIALOG
+    'k-page-create-dialog': isLegacy ? LEGACY_PAGE_CREATE_DIALOG : PAGE_CREATE_DIALOG
   },
   use: [
     function(Vue) {
       const
         VUE_COMPONENTS = Vue.options.components;
 
+      Vue.mixin(PAGE_CREATE_COMMON);
+
       Object.keys(VUE_COMPONENTS).forEach(componentName => {
         const COMPONENT = {
           components: {
-            'k-page-create-dialog': PAGE_CREATE_DIALOG
+            'k-page-create-dialog': isLegacy ? LEGACY_PAGE_CREATE_DIALOG : PAGE_CREATE_DIALOG
           },
           extends: VUE_COMPONENTS[componentName]
         };
