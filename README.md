@@ -25,6 +25,13 @@ git submodule add https://github.com/steirico/kirby-plugin-custom-add-fields.git
 composer require steirico/kirby-plugin-custom-add-fields
 ```
 
+## Compatibility
+
+| Kirby         | Plugin          |
+|---------------|-----------------|
+| pre 3.6       | 1.5.0           |
+| 3.6 and newer | 2.0.0 and newer |
+
 ## Usage
 
 ### Defining custom Add Fields
@@ -94,7 +101,10 @@ In such a manner, kirby's default add fields (`title` and `slug`) can be reused 
 >  ....
 >   addFields:
 >       # Reuse title and slug
+>       # - kirby 3.6 and newer
 >       extends: fields/default-add-fields
+>       # - pre kirby v3.6
+>       # extends: fields/legacy-default-add-fields.yml
 >
 >       # Add custom fields
 >       isbn:
