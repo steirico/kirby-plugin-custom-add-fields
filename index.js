@@ -218,6 +218,7 @@ const PAGE_CREATE_DIALOG = {
               message: ":)",
               event: "page.create"
             });
+            this.$router.go();
           })
           .catch(error => {
             this.$refs.dialog.error(error.message);
