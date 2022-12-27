@@ -18,8 +18,8 @@ const PAGE_CREATE_DIALOG = {
         :value="model"
         :fields="fields"
         :novalidate="true"
-        @submit="submit"
-        @input="input"
+        @input="onInput"
+        @submit="onSubmit"
       />
       <k-box v-else theme="negative">
         This form dialog has no fields
@@ -42,30 +42,34 @@ const PAGE_CREATE_DIALOG = {
       return this.$props.options && this.$props.options.skip;
     }
   },
+
   methods: {
     ready() {
       if(this.skipDialog) {
-        this.submit();
+        this.onSubmit(this.model);
       }
     },
 
-    submit() {
+    onSubmit(values) {
+      this.model = values;
       if (this.isValid()){
-        this.$parent.onSubmit(this.value);
+        this.$emit("submit", values);
       } else {
         this.$refs.dialog.error(this.$t("error.form.incomplete"));
       }
     },
 
-    input() {
+    onInput(values) {
       var
-        data = this.value,
-        template = data.template;
+        template = values.template;
 
       if(template !== this.template){
         this.template  = template;
         this.$props.fields = this.$props.templateData[template];
       }
+
+      this.model = values;
+      this.$emit("input", values);
     },
 
     isValid() {
