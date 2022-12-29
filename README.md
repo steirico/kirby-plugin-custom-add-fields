@@ -176,32 +176,32 @@ In such cases it is advisable to catch exceptions and delete the newly created p
 
 ### Configure Redirects
 
-Kirby's add dialog redirects to the newly created page. Since there is [a related kirby issue](https://github.com/getkirby/kirby/issues/2377)
-if slugs are changed in hooks, this behavior can not be reproduced reliably.
-Therefore, the plugin's default behavior is to remain on the actual panel page after a page has been added.
+Kirby's add dialog redirects to the newly created page.
+This may not be desired if e.g. more than one pages are created by a [hook script](#using-custom-add-fields-in-hook-scripts).
 
-If desired, redirect to the newly created page is possible on a per blueprint basis by setting the property `redirect` to `true`:
+Therefore, the plugin allows to configure redirect behavior after adding a new page on a per blueprint basis by setting the property `redirect`:
 
-> `/blueprints/pages/parent.yml`:
+* `true`: Redirect to the newly created page (default behavior)
+* `false`: Remain on the actual panel page after a page has been added
+
+> `/blueprints/pages/book.yml`:
 >
 >   ```yaml
->   title: Parent Blueprint which skips the Add Dialog
->
 >   # custom add fields definition
 >   addFields:
+>       ...
 >       __dialog:
->           redirect: true
+>           redirect: false
 >   ```
 
 If redirection to an existing page after creation is required, `redirect` can be set to that page id.
 
-> `/blueprints/pages/parent.yml`:
+> `/blueprints/pages/book.yml`:
 >
 >   ```yaml
->   title: Parent Blueprint which skips the Add Dialog
->
 >   # custom add fields definition
 >   addFields:
+>       ...
 >       __dialog:
 >           redirect: my/existing/page/id
 >   ```
@@ -219,7 +219,7 @@ The field can be changed by [kirby options](https://getkirby.com/docs/guide/conf
 > <?php
 >
 > return [
->     // exitsing configurations
+>     // existing configurations
 >     'steirico.kirby-plugin-custom-add-fields.forcedTemplate.fieldName' => 'myForcedTemplateField'
 > ];
 >```

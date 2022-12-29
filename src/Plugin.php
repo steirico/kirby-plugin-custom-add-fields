@@ -214,16 +214,17 @@ class Plugin {
     }
 
     private static function getRedirectTarget($parent, $page): string {
+        $page = kirby()->page($page->uuid());
         $props = $page->blueprint()->toArray();
         $addFields = A::get($props, 'addFields', null);
         $dialogProperties = A::get($addFields, '__dialog', null);
-        $redirectTarget = Plugin::getPanelURL($parent);
+        $redirectTarget = Plugin::getPanelURL($page);
         if($dialogProperties) {
-            $redirectConfig = A::get($addFields['__dialog'], 'redirect', false);
+            $redirectConfig = A::get($addFields['__dialog'], 'redirect', true);
             if(is_string($redirectConfig)){
                 $redirectTarget = Plugin::getPanelURL(kirby()->page($redirectConfig));
-            } else if($redirectConfig == true){
-                $redirectTarget = Plugin::getPanelURL($page);
+            } else if($redirectConfig === false){
+                $redirectTarget = Plugin::getPanelURL($parent);
             }
         }
 
