@@ -1,7 +1,7 @@
 <?php
 use Steineri\CustomAddFields\Plugin;
 
-Kirby::plugin('steirico/kirby-plugin-custom-add-fields', [
+Kirby::plugin('steirico/custom-add-fields', [
     'options' => [
         'forcedTemplate.fieldName' => 'forcedTemplate',
         'forceTemplateSelectionField' => null
